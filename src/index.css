@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #1E3A8A;
+  --color-trust: #2563EB;
+  --color-trust-dark: #1E40AF;
+  --color-trust-light: #60A5FA;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+
+  /* Use CSS variables in theme for automatic reactivity */
+  --color-bg-app: var(--bg-app);
+  --color-card-bg: var(--card-bg);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-accent: var(--accent);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "Monaco", "Menlo", "Consolas", "Ubuntu Mono", "Liberation Mono", monospace;
+}
+
+@layer base {
+  :root {
+    --bg-app: #F8FAFC;
+    --card-bg: #FFFFFF;
+    --text-primary: #111827;
+    --text-muted: #4B5563;
+    --border-subtle: #E5E7EB;
+    --accent: #2563EB;
+  }
+
+  .dark {
+    --bg-app: #09090b;
+    --card-bg: #18181b;
+    --text-primary: #f4f4f5;
+    --text-muted: #9CA3AF;
+    --border-subtle: #27272a;
+    --accent: #3b82f6;
+  }
+
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    @apply font-sans transition-colors duration-300 text-[15px] leading-relaxed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    -webkit-text-size-adjust: 100%;
+    font-style: normal !important;
+  }
+
+  h1, .h1 { @apply text-[22px] font-semibold; }
+  h2, .h2 { @apply text-[18px] font-semibold; }
+  h3, .h3 { @apply text-[16px] font-medium; }
+  
+  /* Tables specific typography */
+  table { @apply text-[14px]; }
+  th { @apply font-medium text-text-muted; }
+
+  /* Ensure all text is non-italicized as per user request */
+  * {
+    font-style: normal !important;
+  }
+
+  /* Support for shadow depth */
+  .shadow-soft {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  }
+  .dark .shadow-soft {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  }
+
+  img {
+    @apply transition-all duration-300;
+  }
+  .dark img {
+    filter: brightness(0.8) contrast(1.1);
+  }
+
+  /* Compact scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-subtle) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full hover:bg-slate-400 dark:hover:bg-slate-600 transition-colors;
+  }
+}
+
+/* Typography Standardization - OS Agnostic & Business Professional */
+@layer utilities {
+  /* Suppress excessive uppercase formatting globally */
+  .uppercase {
+    text-transform: none !important;
+  }
+
+  /* Suppress aggressive letter spacing globally */
+  [class*="tracking-"] {
+    letter-spacing: normal !important;
+  }
+
+  /* Remap heavy font weights to business-appropriate medium weight */
+  .font-black, .font-extrabold, .font-bold {
+    font-weight: 500 !important;
+  }
+
+  /* Ensure large headings maintain a proper semibold hierarchy instead of heavy black */
+  .text-lg.font-black, .text-xl.font-black, .text-2xl.font-black, .text-3xl.font-black, .text-4xl.font-black, .text-5xl.font-black,
+  .text-lg.font-bold, .text-xl.font-bold, .text-2xl.font-bold, .text-3xl.font-bold, .text-4xl.font-bold, .text-5xl.font-bold {
+    font-weight: 600 !important;
+  }
+
+  /* Normalize tiny, unreadable font sizes to standard responsive minimums (12px) */
+  .text-\[7px\], .text-\[7\.5px\], .text-\[8px\], .text-\[8\.5px\], .text-\[9px\] {
+    font-size: 0.75rem !important; /* text-xs */
+    line-height: 1rem !important;
+  }
+  
+  /* Normalize mid-small arbitrary sizes to highly legible (14px) */
+  .text-\[10px\], .text-\[11px\], .text-\[12px\], .text-\[13px\] {
+    font-size: 0.875rem !important; /* text-sm */
+    line-height: 1.25rem !important;
+  }
+}
+
