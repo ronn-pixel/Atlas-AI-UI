@@ -31,6 +31,7 @@ import {
   Briefcase,
   Smartphone,
   ShieldAlert,
+  ShieldCheck,
   Lock,
   FileText,
   ChevronRight,
@@ -47,10 +48,11 @@ const HipaaBadge = ({ hipaaVerificationState }: { hipaaVerificationState: string
   }
 
   return (
-    <div style={{ transform: 'translateX(-700px)' }} className="pointer-events-none flex items-center justify-center">
-      <div className="bg-slate-900 dark:bg-slate-800 border border-slate-700/50 shadow-sm rounded-full h-[32px] px-3 flex items-center gap-2">
-        <CheckCircle className="w-3.5 h-3.5 text-blue-400" />
-        <span className="text-[10px] font-bold tracking-widest text-white uppercase mt-px">HIPAA <span className="text-success">COMPLIANT</span></span>
+    <div className="pointer-events-none flex items-center justify-center animate-in fade-in duration-1000">
+      <div className="bg-success/5 border border-success/20 shadow-[0_0_15px_rgba(34,197,94,0.1)] rounded px-4 h-[36px] flex items-center gap-2.5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-success/10 animate-pulse"></div>
+        <ShieldCheck className="w-5 h-5 text-success relative z-10" />
+        <span className="text-[14px] font-black tracking-wider text-success uppercase mt-0.5 relative z-10">HIPAA VERIFIED</span>
       </div>
     </div>
   );
@@ -952,8 +954,10 @@ export default function Members() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter(m => 
-        m.name.toLowerCase().includes(q) || 
-        m.id.toLowerCase().includes(q)
+        (m.name && m.name.toLowerCase().includes(q)) || 
+        (m.id && m.id.toLowerCase().includes(q)) ||
+        (m.enrollmentDate && m.enrollmentDate.toLowerCase().includes(q)) ||
+        (m.email && m.email.toLowerCase().includes(q))
       );
     }
     return filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -1070,32 +1074,14 @@ export default function Members() {
           )}>
             <div className="min-w-0 shrink">
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase shrink-0">
-                  Search Client:
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase shrink-0 truncate">
+                  CLIENT PROFILE
                 </h1>
-                <div className="relative flex-1 max-w-[300px]">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Enter name..."
-                    className="w-full h-10 pl-9 pr-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-accent/50 transition-all placeholder:text-slate-400 placeholder:font-normal"
-                  />
-                </div>
               </div>
               <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2 truncate">
                 Comprehensive Client Management
               </p>
             </div>
-            {selectedMember && (
-              <button
-                onClick={() => setSelectedMember(null)}
-                className="text-text-muted dark:text-slate-500 hover:text-accent flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider transition-all mt-4 w-max"
-              >
-                <ChevronLeft className="w-4 h-4" /> Back to Registry
-              </button>
-            )}
           </div>
           {!selectedMember && <div className="w-[20px] shrink-0" />}
           {!selectedMember && (
@@ -1156,30 +1142,39 @@ export default function Members() {
             <UserPlus className="w-5 h-5 flex-shrink-0" /> ENROLL CLIENT
           </Button>
         ) : (
-          <div className="flex items-center gap-3">
-            <HipaaBadge hipaaVerificationState={hipaaVerificationState} />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setMemberActionTarget(selectedMember);
-                setActionVerificationType("Edit");
-              }}
-              className="bg-white dark:bg-[#1F2937] border-none shadow-soft font-semibold h-12 px-6 uppercase tracking-wider text-[12px] hover:text-accent transition-all"
+          <div className="flex items-center w-full justify-between gap-3 relative flex-1">
+            <button
+              onClick={() => setSelectedMember(null)}
+              style={{ transform: 'translateX(-700px)' }}
+              className="text-text-muted hover:text-text-primary dark:text-slate-500 dark:hover:text-slate-300 font-semibold uppercase tracking-wider text-[12px] flex items-center gap-2 transition-all whitespace-nowrap"
             >
-              Edit Client
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setMemberActionTarget(selectedMember);
-                setActionVerificationType("Delete");
-              }}
-              className="bg-white dark:bg-[#1F2937] text-danger border-none shadow-soft font-semibold h-12 px-6 uppercase tracking-wider text-[12px] hover:bg-danger/5 transition-all"
-            >
-              Delete
-            </Button>
+              <ChevronLeft className="w-4 h-4" /> Back to Registry
+            </button>
+            <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+              <HipaaBadge hipaaVerificationState={hipaaVerificationState} />
+            </div>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                variant="primaryAction"
+                className="h-[38px] px-5 w-auto min-w-0 max-w-none text-[12px] gap-2 rounded-xl"
+                onClick={() => {
+                  setMemberActionTarget(selectedMember);
+                  setActionVerificationType("Edit");
+                }}
+              >
+                <Edit className="w-4 h-4 opacity-70" /> Edit
+              </Button>
+              <Button
+                variant="primaryAction"
+                className="h-[38px] px-5 w-auto min-w-0 max-w-none text-[12px] gap-2 rounded-xl bg-danger hover:bg-danger/90 shadow-danger/20"
+                onClick={() => {
+                  setMemberActionTarget(selectedMember);
+                  setActionVerificationType("Delete");
+                }}
+              >
+                <Trash2 className="w-4 h-4 opacity-70" /> Delete
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -1193,7 +1188,7 @@ export default function Members() {
         {/* LEFT: Entity Registry */}
         <div
           className={cn(
-            "w-full flex flex-col h-full shrink-0 min-w-0 transition-all duration-500",
+            "w-full flex flex-col h-full shrink-0 min-w-0",
             selectedMember
               ? "hidden lg:flex lg:w-[280px] xl:w-[320px]"
               : "flex-1 min-w-0",
@@ -1222,7 +1217,18 @@ export default function Members() {
                         selectedMember ? "w-full" : "w-1/5",
                       )}
                     >
-                      Client Name
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="relative flex-1 w-full font-semibold text-slate-900 dark:text-white normal-case tracking-normal">
+                          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search using ID or Client Name"
+                            className="w-full h-[38px] pl-11 pr-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm rounded-full outline-none focus:ring-2 focus:ring-accent/50 transition-all placeholder:text-slate-400 placeholder:font-normal"
+                          />
+                        </div>
+                      </div>
                     </th>
                     {!selectedMember && (
                       <>
@@ -1271,8 +1277,15 @@ export default function Members() {
                             : undefined
                         }
                       >
-                        <td className="h-[54px] py-0 px-6 font-black text-text-primary uppercase tracking-tight text-sm truncate text-left">
-                          {member.name}
+                        <td className="h-[54px] py-0 px-6 text-left">
+                          <div className="flex flex-col justify-center">
+                            <span className="font-black text-text-primary uppercase tracking-tight text-sm truncate">
+                              {member.name}
+                            </span>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold tracking-wider mt-px">
+                              ID: {member.id}
+                            </span>
+                          </div>
                         </td>
                         {!selectedMember && (
                           <>
@@ -1340,43 +1353,78 @@ export default function Members() {
             </div>
 
             {/* Custom Pagination for Clients List */}
-            <div className="flex flex-col items-center justify-center px-4 pt-3 pb-3 shrink-0 border-t border-border-subtle bg-card-bg m-0 mt-auto w-full">
-              <div className="flex items-center justify-between w-full max-w-[400px] text-[10px] uppercase tracking-wider font-semibold text-text-muted mb-2">
-                <div className="flex items-center gap-2">
-                  <span>Show</span>
-                  <select
-                    value={pageSize}
-                    onChange={(e) => handlePageSizeChange(Number(e.target.value))}
-                    className="bg-bg-app border border-border-subtle rounded px-1 outline-none focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer h-5 text-[10px]"
-                  >
-                    {[10, 20, 50, 100].map(size => (
-                      <option key={size} value={size}>{size}</option>
-                    ))}
-                  </select>
-                  <span>records</span>
+            {!selectedMember ? (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                pageSize={pageSize}
+                totalRecords={ALL_MEMBERS.length}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            ) : (
+              <div className="flex flex-col gap-3 px-6 pt-3 pb-3 shrink-0 border-t border-border-subtle bg-card-bg m-0 mt-auto w-full min-h-[50px]">
+                {/* Row 1: Records and Total */}
+                <div className="flex items-center justify-between w-full">
+                  {/* Left Section */}
+                  <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold text-text-muted">
+                    <span>Show</span>
+                    <select
+                      value={pageSize}
+                      onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                      className="bg-bg-app border border-border-subtle rounded px-1 outline-none focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer h-5 text-[10px]"
+                    >
+                      {[10, 20, 50, 100].map(size => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                    <span>records</span>
+                  </div>
+                  
+                  {/* Right Section */}
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-text-muted">
+                    Total: <span className="text-text-primary ml-1">{ALL_MEMBERS.length}</span>
+                  </div>
                 </div>
-                <div>Total: <span className="text-text-primary">{ALL_MEMBERS.length}</span></div>
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-                <div className="text-[10px] font-black uppercase tracking-widest text-text-muted w-[80px] text-center">
-                   Page {currentPage} / {Math.max(1, totalPages)}
+
+                {/* Row 2: Pagination Controls */}
+                <div className="flex items-center justify-center w-full">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage === 1}
+                      className="text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      &lt;&lt;
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      &lt;
+                    </button>
+                    <div className="text-[11px] font-black uppercase tracking-widest text-text-muted w-[80px] text-center">
+                       Page {currentPage}/{Math.max(1, totalPages)}
+                    </div>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                      className="text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      &gt;
+                    </button>
+                    <button
+                      onClick={() => handlePageChange(totalPages)}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                      className="text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    >
+                      &gt;&gt;
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
               </div>
-            </div>
+            )}
           </Card>
         </div>
 
