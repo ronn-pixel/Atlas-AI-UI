@@ -11,6 +11,7 @@ interface PaginationProps {
   onPageSizeChange: (size: number) => void;
   className?: string;
   minimal?: boolean;
+  layout?: 'single' | 'two-row';
 }
 
 export function Pagination({
@@ -21,7 +22,7 @@ export function Pagination({
   onPageChange,
   onPageSizeChange,
   className,
-  minimal = false
+  minimal = false,
 }: PaginationProps) {
   const pageSizes = [10, 20, 50, 100];
 
@@ -62,14 +63,14 @@ export function Pagination({
   }
 
   return (
-    <div className={cn("flex flex-col sm:flex-row items-center justify-between gap-2 py-2 px-4 bg-card-bg border-t border-border-subtle", className)}>
-      <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider font-semibold text-text-muted">
+    <div className={cn("flex flex-row items-end justify-center gap-[40px] px-4 bg-card-bg pt-[15px] pb-[15px] shrink-0 border-t border-border-subtle m-0 mt-auto", className)}>
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider font-semibold text-text-muted mb-[2px]">
         <div className="flex items-center gap-2">
           <span>Show</span>
           <select
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            className="bg-bg-app border border-border-subtle rounded px-1.5 py-0.5 outline-none focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer"
+            className="bg-bg-app border border-border-subtle rounded px-1 outline-none focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer h-5 text-[10px]"
           >
             {pageSizes.map(size => (
               <option key={size} value={size}>{size}</option>
@@ -81,46 +82,46 @@ export function Pagination({
         <span>Total: <span className="text-text-primary">{totalRecords}</span></span>
       </div>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center justify-center gap-1">
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             title="First Page"
           >
-            <ChevronsLeft className="w-4 h-4" />
+            <ChevronsLeft className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="w-8 h-8 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             title="Previous Page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="px-3 py-1.5 bg-bg-app border border-border-subtle rounded text-[13px] font-black uppercase tracking-widest text-text-muted mx-2">
-          Page <span className="text-text-primary">{currentPage}</span> / <span className="text-text-primary">{totalPages}</span>
+        <div className="px-2 py-0.5 bg-bg-app border border-border-subtle rounded text-[11px] font-black uppercase tracking-widest text-text-muted mx-2 h-6 flex items-center">
+          Page <span className="text-text-primary ml-1">{currentPage}</span> <span className="mx-1">/</span> <span className="text-text-primary">{totalPages}</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             title="Next Page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages}
-            className="w-8 h-8 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+            className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent hover:border-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             title="Last Page"
           >
-            <ChevronsRight className="w-4 h-4" />
+            <ChevronsRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

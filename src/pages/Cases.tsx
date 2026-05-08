@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '@/store/authStore';
 
 // Status color mapping
 const STATUS_COLORS = {
@@ -39,6 +40,7 @@ const PRIORITY_COLORS = {
 const ALL_CASES = generateCases(150);
 
 export default function Cases() {
+  const { user } = useAuth();
   const [activeFilter, setActiveFilter] = React.useState('All');
   const [cases, setCases] = React.useState(ALL_CASES);
   const [selectedCaseId, setSelectedCaseId] = React.useState<string>(ALL_CASES[0].id);
@@ -133,7 +135,7 @@ export default function Cases() {
       id: `${selectedCaseId}-ACT-${Date.now()}`,
       type: 'email' as const,
       action: emailSubject,
-      user: 'Agent 101',
+      user: user?.name || 'Agent 101',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       date: new Date().toLocaleDateString('en-ZA').replace(/\//g, '.'),
       details: emailBody
@@ -155,7 +157,7 @@ export default function Cases() {
       id: `${selectedCaseId}-ACT-${Date.now()}`, 
       type: 'note' as const, 
       action: 'Internal Note Added', 
-      user: 'Agent 101', 
+      user: user?.name || 'Agent 101', 
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
       date: new Date().toLocaleDateString('en-ZA').replace(/\//g, '.'), 
       details: noteText
@@ -169,41 +171,45 @@ export default function Cases() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-140px)] flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Cases Logic Center</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2">Lifecycle Management</p>
+    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center flex-1 min-w-0 mr-8">
+          <div className="shrink-0 flex flex-col justify-center min-w-0 w-[270px] transition-all duration-300">
+            <div className="min-w-0 shrink">
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase truncate">Cases Logic Center</h1>
+              <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2 truncate">Lifecycle Management</p>
+            </div>
+          </div>
+          <div className="w-[20px] shrink-0" />
+          <div className="h-12 w-px bg-border-subtle dark:bg-white/10 shrink-0" />
+          <div className="w-[20px] shrink-0" />
+          <div className="flex flex-nowrap items-center gap-4 flex-1 min-w-0">
+             {[
+              { label: 'Total Cases', value: cases.length, icon: Inbox },
+              { label: 'Active Cases', value: cases.filter(c => !['Resolved', 'Closed'].includes(c.status)).length, icon: Activity },
+              { label: 'Resolved Cases', value: cases.filter(c => c.status === 'Resolved').length, icon: CheckCircle },
+              { label: 'System Closed Cases', value: cases.filter(c => c.status === 'Closed').length, icon: Shield },
+            ].map(s => (
+              <Card key={s.label} className="px-5 py-4 flex flex-row items-center justify-start gap-4 h-[84px] bg-card-bg shadow-soft border-none relative transition-all hover:bg-accent/5 group rounded-2xl flex-1 min-w-0 shrink-0">
+                <div className="flex flex-col justify-center">
+                  <s.icon className="w-[30px] h-[30px] text-accent shrink-0 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col justify-center min-w-0">
+                  <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none truncate">{s.label}</div>
+                  <div className="text-[22px] font-black text-slate-900 dark:text-white tabular-nums tracking-tight leading-none truncate">{s.value}</div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
         <Button 
+          variant="primaryAction"
+          size="primaryAction"
+          style={{ width: '276px' }}
           onClick={() => setIsCreateModalOpen(true)}
-          className="h-14 bg-accent hover:opacity-90 text-white font-black uppercase text-[11px] tracking-[0.4em] px-10 shadow-xl shadow-accent/20 border-none rounded-2xl transition-all transform active:scale-95 flex items-center gap-3"
         >
-          <Plus className="w-5 h-5" />
-          CREATE NEW CASE
+          <Plus className="w-5 h-5 flex-shrink-0" /> CREATE NEW CASE
         </Button>
-      </div>
-
-      {/* TOP: Scorecards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 shrink-0 px-2 lg:px-0 h-24">
-        {[
-          { label: 'New Cases', value: cases.filter(c => c.status === 'New').length, icon: Inbox, color: 'bg-blue-600' },
-          { label: 'In Review', value: cases.filter(c => c.status === 'In Review').length, icon: Search, color: 'bg-amber-500' },
-          { label: 'Escalated to Vendor', value: cases.filter(c => c.status === 'Escalated to Vendor').length, icon: Zap, color: 'bg-purple-600' },
-          { label: 'Pending', value: cases.filter(c => c.status === 'Pending').length, icon: Clock, color: 'bg-orange-600' },
-          { label: 'Resolved Batch', value: cases.filter(c => c.status === 'Resolved').length, icon: CheckCircle, color: 'bg-success' },
-          { label: 'System Closed', value: cases.filter(c => c.status === 'Closed').length, icon: Shield, color: 'bg-slate-600' },
-        ].map(s => (
-          <Card key={s.label} className="p-4 h-full bg-card-bg border-none shadow-soft rounded-2xl flex items-center gap-4 group hover:bg-accent/5 transition-all overflow-hidden">
-            <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-white shrink-0 shadow-md", s.color)}>
-              <s.icon className="w-5 h-5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 truncate">{s.label}</p>
-              <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 truncate">{s.value}</h4>
-            </div>
-          </Card>
-        ))}
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row gap-4 items-stretch relative overflow-hidden">
@@ -212,33 +218,33 @@ export default function Cases() {
           variant="outline" 
           size="sm" 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
-          className="lg:hidden absolute top-4 left-4 z-50 h-10 w-10 p-0 rounded-xl bg-white dark:bg-slate-900 border-border-subtle shadow-lg"
+          className="lg:hidden absolute top-4 left-4 z-50 h-10 w-10 p-0 rounded-2xl bg-white dark:bg-slate-900 border-border-subtle shadow-lg"
         >
           {isSidebarOpen ? <ChevronLeft className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
         </Button>
 
         {/* LEFT: Case Navigation Mini-Rail */}
       <aside className={cn(
-        "bg-card-bg border border-border-subtle dark:border-white/10 shadow-soft rounded-xl p-6 flex flex-col gap-5 shrink-0 transition-all duration-300 z-40",
+        "bg-card-bg border border-border-subtle dark:border-white/10 shadow-soft rounded-2xl p-6 flex flex-col gap-5 transition-all duration-300 z-40",
         "fixed inset-y-0 left-0 w-[85vw] sm:w-[380px] lg:relative lg:w-[380px] xl:w-[420px]",
         isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 lg:w-0 lg:p-0 lg:opacity-0 lg:overflow-hidden"
       )}>
         
         <div className="flex items-center justify-between shrink-0">
            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><Filter className="w-3.5 h-3.5" /> Case Directory</h3>
-           <div className="flex items-center gap-2 bg-accent/10 px-3 py-1 rounded-lg">
+           <div className="flex items-center gap-2 bg-accent/10 px-3 py-1 rounded-2xl">
              <span className="text-[11px] font-black text-accent">{filteredCases.length}</span>
              <span className="text-[9px] font-bold uppercase tracking-widest text-accent/80">Active Cases</span>
            </div>
         </div>
 
         {/* FILTER CONTROLS */}
-        <div className="flex gap-3 shrink-0">
+        <div className="flex gap-2 shrink-0 items-center">
            <div className="flex-1 relative group">
              <select 
                value={caseTypeFilter}
                onChange={(e) => setCaseTypeFilter(e.target.value)}
-               className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-border-subtle dark:border-white/10 rounded-xl px-3 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+               className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-border-subtle dark:border-white/10 rounded-2xl px-3 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer text-ellipsis overflow-hidden pr-8"
              >
                {['All', 'Claims Processing', 'Member Inquiry', 'Provider Dispute', 'System Anomaly', 'Vendor Escalation'].map(f => (
                  <option key={f} value={f}>{f === 'All' ? 'All Types' : f}</option>
@@ -251,7 +257,7 @@ export default function Cases() {
              <select 
                value={caseStatusFilter}
                onChange={(e) => setCaseStatusFilter(e.target.value)}
-               className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-border-subtle dark:border-white/10 rounded-xl px-3 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+               className="w-full appearance-none bg-slate-50 dark:bg-slate-900 border border-border-subtle dark:border-white/10 rounded-2xl px-3 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer text-ellipsis overflow-hidden pr-8"
              >
                {['All', 'Open', 'In Progress', 'Pending Review', 'Escalated to Vendor'].map(f => (
                  <option key={f} value={f}>{f === 'All' ? 'All Statuses' : f}</option>
@@ -259,33 +265,43 @@ export default function Cases() {
              </select>
              <ChevronDown className="w-3.5 h-3.5 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
            </div>
+
+           <div className="w-8 shrink-0 flex justify-center">
+             <button 
+               onClick={() => { setCaseTypeFilter('All'); setCaseStatusFilter('All'); }} 
+               className={cn("p-1.5 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all", (caseTypeFilter !== 'All' || caseStatusFilter !== 'All') ? "opacity-100" : "opacity-0 pointer-events-none")}
+               title="Clear Filters"
+             >
+                <X className="w-4 h-4 text-slate-500" />
+             </button>
+           </div>
         </div>
 
         {/* COMPACT TABLE HEADER */}
-        <div className="flex items-center px-3 py-2 bg-slate-50/80 dark:bg-slate-900/50 rounded-xl shrink-0 w-full mb-1">
-           <div className="w-24 text-[8px] font-black uppercase tracking-widest text-slate-400">Case No.</div>
-           <div className="flex-1 text-[8px] font-black uppercase tracking-widest text-slate-400 truncate pr-2">Subscriber</div>
-           <div className="w-[84px] text-[8px] font-black uppercase tracking-widest text-slate-400">Type</div>
-           <div className="w-[72px] text-[8px] font-black uppercase tracking-widest text-slate-400 text-left">Status</div>
+        <div className="grid grid-cols-[70px_1fr_80px_70px] gap-2 items-center px-3 py-2 bg-slate-50/80 dark:bg-slate-900/50 rounded-2xl shrink-0 w-full mb-1">
+           <div className="text-[8px] font-black uppercase tracking-widest text-slate-400 truncate">Case No.</div>
+           <div className="text-[8px] font-black uppercase tracking-widest text-slate-400 truncate">Subscriber</div>
+           <div className="text-[8px] font-black uppercase tracking-widest text-slate-400 truncate">Type</div>
+           <div className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-left truncate">Status</div>
         </div>
 
         {/* LIST CONTENT */}
-        <div className="flex-1 h-[600px] overflow-y-auto no-scrollbar space-y-1">
+        <div className="flex-1 overflow-y-auto space-y-1 pr-2 min-h-0">
           {paginatedCases.map((c) => (
             <button
               key={c.id}
               onClick={() => setSelectedCaseId(c.id)}
               className={cn(
-                "flex items-center px-3 py-3 rounded-xl transition-all relative border group w-full text-left",
+                "grid grid-cols-[70px_1fr_80px_70px] gap-2 items-center px-3 py-3 rounded-2xl transition-all relative border group w-full text-left",
                 selectedCaseId === c.id 
                   ? "bg-white dark:bg-slate-800 border-border-subtle dark:border-white/10 shadow-sm ring-1 ring-accent/5" 
                   : "bg-transparent border-transparent hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
               )}
             >
-              <div className="w-24 text-[10px] font-black text-accent uppercase tracking-widest">{c.id.split('-')[2]}</div>
-              <div className="flex-1 text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tight truncate pr-2">{c.memberName}</div>
-              <div className="w-[84px] text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest truncate">{c.issueType.split(' ')[0]}</div>
-              <div className="w-[72px] flex justify-start">
+              <div className="text-[10px] font-black text-accent uppercase tracking-widest truncate">{c.id.split('-')[2]}</div>
+              <div className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tight truncate">{c.memberName}</div>
+              <div className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest truncate">{c.issueType.split(' ')[0]}</div>
+              <div className="flex justify-start min-w-0">
                  <Badge className={cn("text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 max-w-full truncate", STATUS_COLORS[c.status as keyof typeof STATUS_COLORS])}>
                     {c.status === 'Escalated to Vendor' ? 'Vendor' : c.status}
                  </Badge>
@@ -322,10 +338,10 @@ export default function Cases() {
       <motion.main 
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="flex-1 rounded-xl shadow-2xl flex flex-col overflow-hidden relative"
+        className="flex-1 rounded-2xl shadow-2xl flex flex-col overflow-hidden relative"
       >
          {/* HEADER ROWS: Case Details & Member Details combined */}
-         <div className="bg-card-bg border border-border-subtle dark:border-white/10 rounded-xl shadow-soft flex flex-col xl:flex-row shrink-0 mb-3 w-full overflow-hidden min-h-[240px]">
+         <div className="bg-card-bg border border-border-subtle dark:border-white/10 rounded-2xl shadow-soft flex flex-col xl:flex-row shrink-0 mb-3 w-full overflow-hidden min-h-[240px]">
            {/* CASE DETAILS */}
            <div className="flex-1 xl:flex-none xl:w-[72%] min-w-0 p-5 flex flex-col justify-between">
               <div className="flex justify-between items-start mb-4">
@@ -336,7 +352,7 @@ export default function Cases() {
                 <div className="flex items-center gap-3 w-1/3">
                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-500 shrink-0">Status:</span>
                   <select 
-                    className="w-full text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-transparent dark:bg-slate-900 outline-none cursor-pointer text-slate-900 dark:text-white hover:border-accent/40 transition-colors"
+                    className="w-full text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-transparent dark:bg-slate-900 outline-none cursor-pointer text-slate-900 dark:text-white hover:border-accent/40 transition-colors"
                     value={selectedCase.status}
                     onChange={(e) => updateCaseStatus(selectedCase.id, e.target.value)}
                   >
@@ -412,7 +428,7 @@ export default function Cases() {
                  <h3 className="text-[10px] font-black uppercase tracking-[0.3em]">Subscriber Identity</h3>
               </div>
               <div className="flex items-center gap-4 mb-4">
-                 <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-lg font-black text-slate-900 dark:text-white uppercase shadow-sm">
+                 <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-lg font-black text-slate-900 dark:text-white uppercase shadow-sm">
                     {selectedCase.memberName[selectedCase.memberName.length - 1] === '.' ? selectedCase.memberName[0] + selectedCase.memberName[selectedCase.memberName.length - 2] : selectedCase.memberName[0]}
                  </div>
                  <div>
@@ -435,7 +451,7 @@ export default function Cases() {
               </div>
               <Button 
                 onClick={() => setIsViewFullModalOpen(true)}
-                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-black uppercase text-[10px] tracking-[0.3em] h-10 rounded-xl shadow-md transition-all active:scale-95 mt-auto"
+                className="w-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 font-black uppercase text-[10px] tracking-[0.3em] h-10 rounded-2xl shadow-md transition-all active:scale-95 mt-auto"
               >
                  View Full Case
               </Button>
@@ -446,7 +462,7 @@ export default function Cases() {
          <div className="flex-1 w-full mt-0 flex flex-col overflow-hidden relative">
              <div className="flex-1 flex flex-col overflow-hidden">
                {/* UNIFIED CONTAINER */}
-               <div className="bg-card-bg rounded-xl border border-border-subtle dark:border-white/10 shadow-soft flex flex-col w-full flex-1 overflow-hidden">
+               <div className="bg-card-bg rounded-2xl border border-border-subtle dark:border-white/10 shadow-soft flex flex-col w-full flex-1 overflow-hidden">
              
              {/* TOP SECTION: Timeline & Viewer */}
              <div className="flex flex-1 flex-col xl:flex-row overflow-hidden border-b border-border-subtle dark:border-white/5">
@@ -467,7 +483,7 @@ export default function Cases() {
                           key={f.label}
                           onClick={() => { setActiveFilter(f.label); setIsComposingEmail(false); }}
                           className={cn(
-                            "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 shrink-0",
+                            "px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 shrink-0",
                             activeFilter === f.label 
                               ? "bg-accent text-white shadow-xl shadow-accent/30" 
                               : "bg-slate-100 dark:bg-white/5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10"
@@ -496,7 +512,7 @@ export default function Cases() {
                               {selectedCase.files.filter(f => f.status === 'Active').map((f) => (
                                 <div key={f.id} onClick={() => { setSelectedFileId(f.id); setSelectedActivityId(null); setIsComposingEmail(false); }} className={cn("p-4 border rounded-2xl cursor-pointer transition-all", selectedFileId === f.id ? "bg-slate-50 dark:bg-slate-800 border-accent/40 shadow-sm" : "border-border-subtle dark:border-white/5 hover:bg-slate-50/50 dark:hover:bg-white/[0.02]")}>
                                   <div className="flex items-start justify-between mb-4">
-                                    <div className="w-10 h-10 bg-accent/10 text-accent rounded-xl flex items-center justify-center">
+                                    <div className="w-10 h-10 bg-accent/10 text-accent rounded-2xl flex items-center justify-center">
                                       <FileText className="w-5 h-5" />
                                     </div>
                                     <span className="text-[8px] font-black uppercase text-accent bg-accent/10 px-2 py-0.5 rounded">{f.type}</span>
@@ -519,7 +535,7 @@ export default function Cases() {
                                 {selectedCase.files.filter(f => f.status === 'Archived').map((f) => (
                                   <div key={f.id} className="p-4 border border-border-subtle dark:border-white/5 rounded-2xl flex items-center justify-between opacity-70">
                                     <div className="flex items-center gap-4">
-                                      <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400 flex items-center justify-center"><Layers className="w-4 h-4"/></div>
+                                      <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-white/5 text-slate-400 flex items-center justify-center"><Layers className="w-4 h-4"/></div>
                                       <div>
                                         <h4 className="text-xs font-black text-slate-600 dark:text-slate-300 truncate mb-1">{f.name}</h4>
                                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">{f.archivePath}</p>
@@ -547,7 +563,7 @@ export default function Cases() {
                                 }}
                               >
                                 <div className={cn(
-                                  "absolute -left-[46px] top-0 w-8 h-8 rounded-lg flex items-center justify-center shadow-md z-20 group-hover:scale-110 transition-transform duration-300",
+                                  "absolute -left-[46px] top-0 w-8 h-8 rounded-2xl flex items-center justify-center shadow-md z-20 group-hover:scale-110 transition-transform duration-300",
                                   act.type === 'email' ? 'bg-indigo-500 text-white' : 
                                   act.type === 'call' ? 'bg-orange-500 text-white' : 
                                   act.type === 'note' ? 'bg-blue-500 text-white' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
@@ -558,7 +574,7 @@ export default function Cases() {
                                   {act.type === 'status' && <Shield className="w-3.5 h-3.5" />}
                                 </div>
 
-                                <div className="flex justify-between items-start mb-1 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-800/50 p-2 -my-2 -mx-2 rounded-xl transition-colors">
+                                <div className="flex justify-between items-start mb-1 group-hover:bg-slate-50/50 dark:group-hover:bg-slate-800/50 p-2 -my-2 -mx-2 rounded-2xl transition-colors">
                                   <div className="space-y-0.5 pointer-events-none">
                                     <h4 className="text-xs font-black text-text-primary dark:text-white uppercase tracking-tight">{act.action}</h4>
                                     <div className="flex items-center gap-2">
@@ -569,7 +585,7 @@ export default function Cases() {
                                   <span className="text-[9px] font-black text-text-muted dark:text-slate-500 tabular-nums uppercase tracking-widest pointer-events-none">{act.time}</span>
                                 </div>
 
-                                <div className={cn("p-4 bg-slate-50/50 dark:bg-slate-900/20 border-none rounded-xl mt-2 transition-colors", selectedActivityId === act.id && "bg-white dark:bg-slate-800 shadow-sm border border-border-subtle dark:border-white/10")}>
+                                <div className={cn("p-4 bg-slate-50/50 dark:bg-slate-900/20 border-none rounded-2xl mt-2 transition-colors", selectedActivityId === act.id && "bg-white dark:bg-slate-800 shadow-sm border border-border-subtle dark:border-white/10")}>
                                   {act.type === 'email' ? (
                                     <p className="text-[11px] leading-relaxed font-medium text-text-muted dark:text-slate-400 line-clamp-2">
                                       {act.details}
@@ -611,11 +627,11 @@ export default function Cases() {
                         <div className="space-y-4 flex-1 flex flex-col">
                           <div>
                             <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1 block">Subject</label>
-                            <input type="text" value={emailSubject} onChange={e => setEmailSubject(e.target.value)} className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-[10px] font-black tracking-widest uppercase outline-none focus:ring-2 focus:ring-accent/20 text-slate-900 dark:text-white" />
+                            <input type="text" value={emailSubject} onChange={e => setEmailSubject(e.target.value)} className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl px-3 py-2 text-[10px] font-black tracking-widest uppercase outline-none focus:ring-2 focus:ring-accent/20 text-slate-900 dark:text-white" />
                           </div>
                           <div className="flex-1 flex flex-col min-h-[200px]">
                             <label className="text-[8px] font-black uppercase tracking-widest text-slate-500 mb-1 block">Message Body</label>
-                            <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} className="w-full flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-3 text-xs font-medium resize-none outline-none focus:ring-2 focus:ring-accent/20 text-slate-900 dark:text-white leading-relaxed" placeholder="Type message..." />
+                            <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} className="w-full flex-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl px-3 py-3 text-xs font-medium resize-none outline-none focus:ring-2 focus:ring-accent/20 text-slate-900 dark:text-white leading-relaxed" placeholder="Type message..." />
                           </div>
                         </div>
                         <div className="pt-4 mt-auto border-t border-border-subtle dark:border-white/5 flex justify-end gap-2 shrink-0">
@@ -675,15 +691,15 @@ export default function Cases() {
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{selectedFile.type} • {selectedFile.size}</p>
                         </div>
                         <div className="pt-6 mt-auto border-t border-border-subtle dark:border-white/5 flex flex-col gap-3 shrink-0">
-                          <Button onClick={() => archiveFile(selectedFile.id)} variant="outline" className="text-[9px] font-black uppercase tracking-widest h-10 w-full text-slate-600 dark:text-slate-300 transition-all rounded-xl border-border-subtle dark:border-white/10">Archive File</Button>
-                          <Button onClick={() => deleteFile(selectedFile.id)} variant="outline" className="text-[9px] font-black uppercase tracking-widest h-10 w-full text-danger hover:text-white hover:bg-danger/80 transition-all rounded-xl border-danger/20">Delete File</Button>
+                          <Button onClick={() => archiveFile(selectedFile.id)} variant="outline" className="text-[9px] font-black uppercase tracking-widest h-10 w-full text-slate-600 dark:text-slate-300 transition-all rounded-2xl border-border-subtle dark:border-white/10">Archive File</Button>
+                          <Button onClick={() => deleteFile(selectedFile.id)} variant="outline" className="text-[9px] font-black uppercase tracking-widest h-10 w-full text-danger hover:text-white hover:bg-danger/80 transition-all rounded-2xl border-danger/20">Delete File</Button>
                         </div>
                       </div>
                     ) : activeFilter === 'Emails' ? (
                       <div className="flex flex-col items-center justify-center h-full text-center">
                         <Mail className="w-8 h-8 mb-4 text-slate-400 opacity-40 max-w-full" />
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-6 max-w-[170px]">Select an email to view or compose a new one</p>
-                        <Button onClick={() => setIsComposingEmail(true)} size="sm" className="h-10 px-6 text-[10px] font-black uppercase tracking-widest bg-accent hover:bg-accent/90 text-white rounded-xl shadow-lg border-0 transition-transform active:scale-95">
+                        <Button onClick={() => setIsComposingEmail(true)} size="sm" className="h-10 px-6 text-[10px] font-black uppercase tracking-widest bg-accent hover:bg-accent/90 text-white rounded-2xl shadow-lg border-0 transition-transform active:scale-95">
                           Compose Email
                         </Button>
                       </div>
@@ -713,7 +729,7 @@ export default function Cases() {
                         }
                       }}
                     />
-                    <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-accent/5 text-accent rounded-xl hover:bg-accent hover:text-white transition-all transform active:scale-95">
+                    <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-accent/5 text-accent rounded-2xl hover:bg-accent hover:text-white transition-all transform active:scale-95">
                        <Paperclip className="w-4 h-4" />
                     </button>
                   </div>
@@ -781,6 +797,7 @@ interface CaseModalProps {
 }
 
 function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit, onSave }: CaseModalProps) {
+  const { user } = useAuth();
   const isCreate = !caseData;
   const [formData, setFormData] = React.useState(caseData || {
     status: '',
@@ -827,7 +844,7 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
       <h3 className="text-[11px] font-black text-accent uppercase tracking-[0.4em] border-b border-border-subtle dark:border-white/5 pb-3">
         {title}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {children}
       </div>
     </div>
@@ -837,13 +854,13 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
     <div className="space-y-1.5">
       <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">{label}</label>
       {readOnly ? (
-        <div className="h-10 flex items-center px-4 bg-slate-50 dark:bg-slate-900 border border-transparent rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="h-10 flex items-center px-4 bg-slate-50 dark:bg-slate-900 border border-transparent rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">
           {value || '---'}
         </div>
       ) : options ? (
         <select 
           defaultValue={value} 
-          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
         >
           <option value="" disabled>{placeholder || `Select ${label}`}</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -853,7 +870,7 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
           type={type} 
           defaultValue={value}
           placeholder={placeholder || `Enter ${label}`}
-          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20" 
+          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20" 
         />
       )}
     </div>
@@ -873,7 +890,7 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Modal Header */}
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/20">
@@ -892,7 +909,7 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
                 variant="outline" 
                 onClick={onToggleEdit}
                 className={cn(
-                  "h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                  "h-10 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
                   isEditing ? "bg-accent text-white border-none" : "bg-white dark:bg-slate-900"
                 )}
               >
@@ -901,7 +918,7 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
             )}
             <button 
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -911,12 +928,12 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto no-scrollbar p-10 space-y-12">
           <Section title="Ticket Information">
-            <Field label="Ticket Owner" value={isCreate ? "" : (caseData?.ticketOwner || "Agent 101")} />
+            <Field label="Ticket Owner" value={isCreate ? "" : (caseData?.ticketOwner || user?.name || "Agent 101")} />
             <Field label="Ticket Number" value={isCreate ? "" : (caseData?.id || "---")} />
             <Field label="Ticket Origin" value={isCreate ? "" : (caseData?.ticketOrigin || "Manual Entry")} options={['Manual Entry', 'Direct Mail', 'Email Interface', 'Tele-Link']} />
             <Field label="Subject" value={isCreate ? "" : (caseData?.description?.slice(0, 30) || "")} />
             <Field label="Inquiry Type" value={isCreate ? "" : (caseData?.issueType || "")} options={['Claims Processing', 'Member Inquiry', 'Provider Dispute', 'System Anomaly', 'Vendor Escalation']} />
-            <Field label="Assigned To" value={isCreate ? "" : (caseData?.agent || "Ronn A.")} />
+            <Field label="Assigned To" value={isCreate ? "" : (caseData?.agent || user?.name || user?.email?.split('@')[0] || "Agent 101")} />
             <Field label="Send To Email" value={isCreate ? "" : (caseData?.sendToEmail || "support@insurance-saas.com")} />
             <Field label="Date/Time Opened" value={isCreate ? "" : (caseData?.createdDate || "2026-04-29 10:00 AM")} />
             <Field label="Status" value={isCreate ? "" : (caseData?.status || "New")} options={['New', 'In Review', 'Escalated to Vendor', 'Pending', 'Resolved', 'Closed']} />
@@ -960,7 +977,7 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
           </Section>
 
           <Section title="System Metadata">
-            <Field label="Created By" value={isCreate ? "" : (caseData?.createdBy || "Agent 101")} />
+            <Field label="Created By" value={isCreate ? "" : (caseData?.createdBy || user?.name || "Agent 101")} />
             <Field label="Last Modified By" value={isCreate ? "" : (caseData?.lastModifiedBy || "SYSTEM_DAEMON")} />
             <Field label="Date/Time Closed" value={isCreate ? "" : (caseData?.dateTimeClosed || "---")} />
             <Field label="Case Closure Time (Days)" value={isCreate ? "" : (caseData?.closureTime || "---")} />
@@ -972,14 +989,14 @@ function CaseModal({ isOpen, onClose, caseData, isEditing = false, onToggleEdit,
           <Button 
             variant="outline" 
             onClick={onClose}
-            className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+            className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
           >
             Cancel
           </Button>
           {(isCreate || isEditing) && (
             <Button 
               onClick={() => onSave(formData)}
-              className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
+              className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
             >
               {isCreate ? 'Save Case' : 'Save Changes'}
             </Button>

@@ -90,7 +90,7 @@ export default function AdminAccess() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex border-b border-subtle dark:border-slate-800 gap-8 overflow-x-auto no-scrollbar pt-2">
+        <div className="flex border-b border-subtle dark:border-slate-800 gap-6 overflow-x-auto no-scrollbar pt-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -128,7 +128,7 @@ export default function AdminAccess() {
                   <input 
                     type="text" 
                     placeholder="Search Directory..." 
-                    className="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-subtle dark:border-slate-700 rounded-lg text-xs font-bold focus:ring-1 focus:ring-trust outline-none w-80 shadow-sm dark:text-white"
+                    className="pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-subtle dark:border-slate-700 rounded-2xl text-xs font-bold focus:ring-1 focus:ring-trust outline-none w-80 shadow-sm dark:text-white"
                   />
                 </div>
                 <Button size="sm" className="gap-2 bg-trust hover:bg-trust-dark font-black h-10 px-6 uppercase tracking-widest group">
@@ -139,20 +139,20 @@ export default function AdminAccess() {
 
             <div className="overflow-x-auto">
               <table className="w-full border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50/50 dark:bg-slate-900/30 border-b border-subtle dark:border-slate-700">
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">Identified Entity</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">System Permissions</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">Security Status</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">Telemetry</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-center align-middle">Operations</th>
+                <thead className="sticky top-0 z-10 shadow-[0_1px_0_0_theme(colors.border.subtle)] bg-card-bg">
+<tr className="bg-slate-50/50 dark:bg-slate-900/30 border-b border-subtle dark:border-slate-700">
+                    <th className="h-[46px] py-0 px-6 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">Identified Entity</th>
+                    <th className="h-[46px] py-0 px-6 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">System Permissions</th>
+                    <th className="h-[46px] py-0 px-6 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">Security Status</th>
+                    <th className="h-[46px] py-0 px-6 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-left align-middle">Telemetry</th>
+                    <th className="h-[46px] py-0 px-6 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-[10px] text-center align-middle">Operations</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-subtle dark:divide-slate-700 font-medium">
                   {users.map((user) => (
                     <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group">
-                      <td className="px-6 py-4 flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-slate-50 dark:bg-slate-900 border border-subtle dark:border-slate-700 flex items-center justify-center font-black text-text-muted dark:text-slate-400 text-xs shadow-sm group-hover:border-trust transition-colors">
+                      <td className="h-[54px] py-0 px-6 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-subtle dark:border-slate-700 flex items-center justify-center font-black text-text-muted dark:text-slate-400 text-xs shadow-sm group-hover:border-trust transition-colors">
                           {user.name.split(' ').map(n => n[0]).join('')}
                         </div>
                         <div className="text-left">
@@ -160,13 +160,13 @@ export default function AdminAccess() {
                           <div className="text-[10px] text-text-muted dark:text-slate-500 font-bold lowercase">{user.email}</div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-left">
+                      <td className="h-[54px] py-0 px-6 text-left">
                         <div className="flex items-center gap-2">
                            <Shield className="w-3.5 h-3.5 text-trust" />
                            <span className="text-[10px] font-black uppercase tracking-tighter text-text-primary dark:text-white underline decoration-trust/30 underline-offset-4">{user.role}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-left">
+                      <td className="h-[54px] py-0 px-6 text-left">
                         <Badge 
                           variant={user.status === 'Active' ? 'success' : 'danger'} 
                           className="text-[9px] font-black uppercase tracking-widest px-3 shadow-sm"
@@ -174,13 +174,13 @@ export default function AdminAccess() {
                           {user.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 text-left">
+                      <td className="h-[54px] py-0 px-6 text-left">
                          <div className="flex flex-col">
                             <span className="text-[10px] text-text-primary dark:text-white font-black">{user.activity}</span>
                             <span className="text-[8px] text-text-muted dark:text-slate-500 font-mono font-bold mt-1 uppercase tracking-tighter">{user.ip}</span>
                          </div>
                       </td>
-                      <td className="px-6 py-4 text-center align-middle">
+                      <td className="h-[54px] py-0 px-6 text-center align-middle">
                         <div className="flex justify-center gap-2">
                            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-subtle dark:border-slate-700 dark:text-slate-400 hover:text-trust hover:border-trust"><Edit className="w-3.5 h-3.5" /></Button>
                            <Button variant="outline" size="sm" className="h-8 w-8 p-0 border-subtle dark:border-slate-700 text-danger/60 hover:text-danger hover:border-danger"><Trash2 className="w-3.5 h-3.5" /></Button>
@@ -208,12 +208,12 @@ export default function AdminAccess() {
                    </div>
                    <div className="overflow-x-auto">
                       <table className="w-full text-left border-collapse text-[10px]">
-                         <thead>
-                            <tr className="bg-slate-50/30 dark:bg-slate-900/10 border-b border-subtle dark:border-slate-700">
-                               <th className="px-5 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Capability Endpoint</th>
-                               <th className="px-5 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Admin</th>
-                               <th className="px-5 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Agent</th>
-                               <th className="px-5 py-4 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Auditor</th>
+                         <thead className="sticky top-0 z-10 shadow-[0_1px_0_0_theme(colors.border.subtle)] bg-card-bg">
+<tr className="bg-slate-50/30 dark:bg-slate-900/10 border-b border-subtle dark:border-slate-700">
+                               <th className="h-[46px] py-0 px-5 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Capability Endpoint</th>
+                               <th className="h-[46px] py-0 px-5 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Admin</th>
+                               <th className="h-[46px] py-0 px-5 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Agent</th>
+                               <th className="h-[46px] py-0 px-5 font-black uppercase tracking-widest text-text-muted dark:text-slate-500 text-left align-middle">Auditor</th>
                             </tr>
                          </thead>
                          <tbody className="divide-y divide-subtle dark:divide-slate-700">
@@ -225,14 +225,14 @@ export default function AdminAccess() {
                               { label: 'Reports: Forensic Export', admin: true, agent: true, audit: true },
                             ].map((perm, i) => (
                               <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors group">
-                                 <td className="px-5 py-4 font-black text-text-primary dark:text-white uppercase tracking-tight">{perm.label}</td>
-                                 <td className="px-5 py-4 text-center">
+                                 <td className="h-[54px] py-0 px-5 font-black text-text-primary dark:text-white uppercase tracking-tight">{perm.label}</td>
+                                 <td className="h-[54px] py-0 px-5 text-center">
                                     {perm.admin ? <Check className="w-4 h-4 mx-auto text-success" /> : <X className="w-4 h-4 mx-auto text-text-muted" />}
                                  </td>
-                                 <td className="px-5 py-4 text-center">
+                                 <td className="h-[54px] py-0 px-5 text-center">
                                     {perm.agent ? <Check className="w-4 h-4 mx-auto text-success" /> : <X className="w-4 h-4 mx-auto text-text-muted" />}
                                  </td>
-                                 <td className="px-5 py-4 text-center">
+                                 <td className="h-[54px] py-0 px-5 text-center">
                                     {perm.audit ? <Check className="w-4 h-4 mx-auto text-success" /> : <X className="w-4 h-4 mx-auto text-text-muted" />}
                                  </td>
                               </tr>
@@ -252,7 +252,7 @@ export default function AdminAccess() {
                         { name: 'External Auditor', count: 12, desc: 'Read-only forensics' },
                         { name: 'Member Success', count: 15, desc: 'Engagement focus' },
                       ].map(role => (
-                        <div key={role.name} className="p-3 border border-subtle dark:border-slate-700 rounded-lg hover:border-trust transition-all cursor-pointer group">
+                        <div key={role.name} className="p-3 border border-subtle dark:border-slate-700 rounded-2xl hover:border-trust transition-all cursor-pointer group">
                            <div className="flex justify-between items-center">
                               <span className="text-[10px] font-black text-text-primary dark:text-white uppercase tracking-tight">{role.name}</span>
                               <Badge variant="outline" className="text-[8px] font-mono dark:border-slate-700">{role.count}</Badge>
@@ -306,7 +306,7 @@ export default function AdminAccess() {
                    <Key className="w-4 h-4" /> Global Encryption Matrix
                 </h3>
                 <div className="space-y-6 relative z-10">
-                   <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-4">
+                   <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-4">
                       <div className="flex justify-between items-center">
                          <span className="text-[10px] font-black uppercase tracking-tight">At-Rest: AES-256-GCM</span>
                          <Badge variant="success" className="bg-success text-white border-none text-[8px] font-black tracking-widest">ACTIVE</Badge>

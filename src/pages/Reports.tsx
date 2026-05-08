@@ -52,7 +52,7 @@ const DUMMY_REPORTS = [
 export default function Reports() {
   const [isExecuteReportModalOpen, setIsExecuteReportModalOpen] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(20);
 
   const totalPages = Math.ceil(DUMMY_REPORTS.length / pageSize);
   const currentRecords = DUMMY_REPORTS.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -67,58 +67,65 @@ export default function Reports() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 h-full flex flex-col">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Analytical Manifest</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2">Enterprise Intelligence & Data Extraction</p>
+    <div className="flex flex-col gap-[10px] animate-in fade-in duration-700 pb-0 m-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center flex-1 min-w-0 mr-8">
+          <div className="shrink-0 flex flex-col justify-center min-w-0 w-[270px] transition-all duration-300">
+            <div className="min-w-0 shrink">
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase truncate">Analytical Manifest</h1>
+              <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2 truncate">Enterprise Intelligence & Data Extraction</p>
+            </div>
+          </div>
+          <div className="w-[20px] shrink-0" />
+          <div className="h-12 w-px bg-border-subtle dark:bg-white/10 shrink-0" />
+          <div className="w-[20px] shrink-0" />
+          <div className="flex flex-nowrap items-center gap-4 flex-1 min-w-0">
+             {[
+               { label: 'Financial Extracts', count: 124, icon: PieChart },
+               { label: 'Operational Audits', count: 86, icon: Activity },
+               { label: 'System Logs', count: 2140, icon: BarChart },
+             ].map(c => (
+               <Card key={c.label} className="px-5 py-4 flex flex-row items-center justify-start gap-4 h-[84px] bg-card-bg shadow-soft border-none relative transition-all hover:bg-accent/5 group rounded-2xl flex-1 min-w-0 shrink-0 cursor-pointer">
+                  <div className="flex flex-col justify-center">
+                     <c.icon className="w-[30px] h-[30px] text-accent shrink-0 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                  </div>
+                  <div className="flex flex-col justify-center min-w-0">
+                    <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none truncate">{c.label}</div>
+                    <div className="text-[22px] font-black text-slate-900 dark:text-white tabular-nums tracking-tight leading-none truncate">{c.count}</div>
+                  </div>
+               </Card>
+             ))}
+          </div>
         </div>
         <Button 
+          variant="primaryAction"
+          size="primaryAction"
+          style={{ width: '276px' }}
           onClick={() => setIsExecuteReportModalOpen(true)}
-          size="sm" 
-          className="h-14 bg-accent hover:opacity-90 text-white font-black uppercase text-[11px] tracking-[0.4em] px-12 shadow-xl shadow-accent/20 border-none rounded-2xl transition-all transform active:scale-95 flex items-center gap-3"
         >
-          <FileDown className="w-5 h-5" /> Execute Report
+          <FileDown className="w-5 h-5 flex-shrink-0" /> EXECUTE REPORT
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 shrink-0">
-         {[
-           { label: 'Financial Extracts', count: 124, icon: PieChart, color: 'bg-blue-600' },
-           { label: 'Operational Audits', count: 86, icon: Activity, color: 'bg-purple-600' },
-           { label: 'System Logs', count: 2140, icon: BarChart, color: 'bg-indigo-600' },
-         ].map(c => (
-           <Card key={c.label} className="p-5 h-24 bg-card-bg border-none shadow-soft rounded-2xl group cursor-pointer hover:translate-y-[-4px] transition-all flex items-center gap-6">
-              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg", c.color)}>
-                 <c.icon className="w-6 h-6" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400 truncate">{c.label}</p>
-                <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter mt-0.5 truncate">{c.count} Manifests</h4>
-              </div>
-           </Card>
-         ))}
-      </div>
-
-      <Card className="overflow-hidden bg-card-bg border-none rounded-xl shadow-soft flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-auto no-scrollbar">
+      <Card className="overflow-hidden bg-card-bg border-none rounded-2xl shadow-soft flex flex-col h-[900px] shrink-0 m-0">
+        <div className="w-full flex-1 overflow-auto min-h-0 relative">
           <table className="w-full border-collapse table-fixed min-w-[1000px]">
-            <thead>
-              <tr className="bg-bg-app">
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/4 text-left align-middle">Report Identity</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/6 text-left align-middle">Originator</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/6 text-left align-middle">Date</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/6 text-left align-middle">Format</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/8 text-left align-middle">Status</th>
-                <th className="px-10 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/8 text-center align-middle">Action</th>
+            <thead className="sticky top-0 z-10 shadow-[0_1px_0_0_theme(colors.border.subtle)] bg-card-bg">
+<tr className="bg-bg-app">
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/4 text-left align-middle">Report Identity</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/6 text-left align-middle">Originator</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/6 text-left align-middle">Date</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/6 text-left align-middle">Format</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/8 text-left align-middle">Status</th>
+                <th className="h-[46px] py-0 px-10 font-black uppercase tracking-[0.3em] text-text-muted text-[10px] w-1/8 text-center align-middle">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle">
               {currentRecords.map((r) => (
                 <tr key={r.id} className="hover:bg-bg-app transition-all duration-300 group">
-                  <td className="px-6 py-4">
+                  <td className="h-[54px] py-0 px-6 ">
                      <div className="flex items-center justify-start gap-4">
-                        <div className="w-8 h-8 rounded-lg bg-bg-app flex items-center justify-center shrink-0 border border-border-subtle">
+                        <div className="w-8 h-8 rounded-2xl bg-bg-app flex items-center justify-center shrink-0 border border-border-subtle">
                            <FileText className="w-4 h-4 text-text-muted" />
                         </div>
                         <div className="text-left min-w-0">
@@ -127,14 +134,14 @@ export default function Reports() {
                         </div>
                      </div>
                   </td>
-                  <td className="px-6 py-4 font-black text-text-muted uppercase tracking-widest text-[11px] truncate text-left">{r.user}</td>
-                  <td className="px-6 py-4 text-text-muted font-bold tracking-widest text-[11px] tabular-nums text-left">{r.date}</td>
-                  <td className="px-6 py-4 text-left">
+                  <td className="h-[54px] py-0 px-6 font-black text-text-muted uppercase tracking-widest text-[11px] truncate text-left">{r.user}</td>
+                  <td className="h-[54px] py-0 px-6 text-text-muted font-bold tracking-widest text-[11px] tabular-nums text-left">{r.date}</td>
+                  <td className="h-[54px] py-0 px-6 text-left">
                     <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest bg-bg-app border-none px-3 text-text-muted">
                       {r.format}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="h-[54px] py-0 px-6 ">
                     <div className="flex flex-col items-start gap-1">
                        <Badge className={cn(
                         "text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 border-none shadow-none",
@@ -144,7 +151,7 @@ export default function Reports() {
                       </Badge>
                     </div>
                   </td>
-                  <td className="px-10 py-4 text-center align-middle">
+                  <td className="h-[54px] py-0 px-10 text-center align-middle">
                     <div className="flex items-center justify-center gap-2">
                        <button className="p-2 text-text-muted hover:text-accent transition-all transform active:scale-90" disabled={r.status !== 'Ready'}><Download className="w-4.5 h-4.5" /></button>
                        <button className="p-2 text-text-muted hover:text-danger transition-all transform active:scale-90"><Trash2 className="w-4.5 h-4.5" /></button>
@@ -163,7 +170,6 @@ export default function Reports() {
           totalRecords={DUMMY_REPORTS.length}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
-          className="!mb-[5px]"
         />
       </Card>
 
@@ -246,7 +252,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
       <h3 className="text-[11px] font-black text-accent uppercase tracking-[0.4em] border-b border-border-subtle dark:border-white/5 pb-3">
         {title}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {children}
       </div>
     </div>
@@ -277,7 +283,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
         {error && <span className="text-[8px] font-black text-danger uppercase tracking-widest animate-pulse">{error}</span>}
       </div>
       {readOnly ? (
-        <div className="h-10 flex items-center px-4 bg-slate-50 dark:bg-slate-900 border border-transparent rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">
+        <div className="h-10 flex items-center px-4 bg-slate-50 dark:bg-slate-900 border border-transparent rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight overflow-hidden text-ellipsis whitespace-nowrap">
           {value || '---'}
         </div>
       ) : options ? (
@@ -285,7 +291,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
           value={value}
           onChange={(e) => onChange?.(e.target.value)}
           className={cn(
-            "h-10 w-full px-4 bg-white dark:bg-slate-950 border rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer transition-all",
+            "h-10 w-full px-4 bg-white dark:bg-slate-950 border rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer transition-all",
             error ? "border-danger ring-danger/10" : "border-border-subtle dark:border-white/10"
           )}
         >
@@ -299,7 +305,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
           placeholder={placeholder || `Enter ${label}`}
           onChange={(e) => onChange?.(e.target.value)}
           className={cn(
-            "h-10 w-full px-4 bg-white dark:bg-slate-950 border rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 transition-all",
+            "h-10 w-full px-4 bg-white dark:bg-slate-950 border rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 transition-all",
             error ? "border-danger ring-danger/10" : "border-border-subtle dark:border-white/10"
           )}
         />
@@ -321,7 +327,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Modal Header */}
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/20">
@@ -348,7 +354,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
             disabled={status === 'running'}
             onClick={onClose}
             className={cn(
-              "w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors",
+              "w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors",
               status === 'running' && "opacity-20 cursor-not-allowed"
             )}
           >
@@ -437,13 +443,13 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
           {currentStep === 4 && (
             <div className="flex flex-col items-center justify-center py-24 text-center">
                <div className="relative mb-8">
-                  <div className="w-24 h-24 rounded-3xl bg-accent/5 border border-accent/10 flex items-center justify-center text-accent shadow-2xl shadow-accent/5">
+                  <div className="w-24 h-24 rounded-2xl bg-accent/5 border border-accent/10 flex items-center justify-center text-accent shadow-2xl shadow-accent/5">
                      <Loader2 className="w-12 h-12 animate-spin" />
                   </div>
                   <motion.div 
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-slate-900 rounded-xl shadow-lg flex items-center justify-center border border-accent/10"
+                    className="absolute -bottom-2 -right-2 w-10 h-10 bg-white dark:bg-slate-900 rounded-2xl shadow-lg flex items-center justify-center border border-accent/10"
                   >
                      <Activity className="w-5 h-5 text-accent animate-pulse" />
                   </motion.div>
@@ -471,7 +477,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
                <h3 className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Analysis Finalized</h3>
                <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-3 mb-12">Your intelligence extract has been verified and is ready for acquisition</p>
                
-               <div className="p-8 bg-slate-50 dark:bg-slate-950 rounded-[2.5rem] border border-slate-100 dark:border-white/5 w-full max-w-md mb-12">
+               <div className="p-8 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-white/5 w-full max-w-md mb-12">
                   <div className="flex items-center gap-5">
                     <div className="w-12 h-12 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center shadow-md">
                       <FileCheck className="w-6 h-6 text-accent" />
@@ -494,7 +500,7 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
                 <Button 
                   variant="outline" 
                   onClick={handleBack}
-                  className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+                  className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
                 >
                   Back Step
                 </Button>
@@ -502,21 +508,21 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
               <Button 
                 variant="outline"
                 onClick={onClose}
-                className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+                className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
               >
                 Cancel Extraction
               </Button>
               {currentStep < 3 ? (
                 <Button 
                   onClick={handleNext}
-                  className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
+                  className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
                 >
                   Proceed
                 </Button>
               ) : (
                 <Button 
                   onClick={handleRunReport}
-                  className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 flex items-center gap-3"
+                  className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 flex items-center gap-3"
                 >
                   <Activity className="w-4 h-4" />
                   Execute Extraction
@@ -536,13 +542,13 @@ function ExecuteReportModal({ isOpen, onClose, onSave }: { isOpen: boolean, onCl
               <Button 
                 variant="outline"
                 onClick={onClose}
-                className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+                className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
               >
                 Close Terminal
               </Button>
               <Button 
                 onClick={() => onSave(formData)}
-                className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 flex items-center gap-3"
+                className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 flex items-center gap-3"
               >
                 <Download className="w-4 h-4" />
                 Capture Data

@@ -25,7 +25,7 @@ export const Alert = ({ variant = 'info', title, children, className }: AlertPro
   };
 
   return (
-    <div className={cn('p-4 rounded-lg border flex gap-3', variants[variant], className)}>
+    <div className={cn('p-4 rounded-2xl border flex gap-3', variants[variant], className)}>
       <div className="mt-0.5">{icons[variant]}</div>
       <div>
         {title && <h5 className="font-bold text-sm mb-1">{title}</h5>}

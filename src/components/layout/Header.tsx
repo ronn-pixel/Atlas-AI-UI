@@ -38,7 +38,7 @@ import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/store/authStore';
 import { useSearchStore } from '@/store/searchStore';
 import { AnimatePresence, motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { generateMembers, generateVendors, generateClaims, generateCases, generatePlans } from '@/utils/dummyData';
 
 export const Header = () => {
@@ -57,8 +57,17 @@ export const Header = () => {
     clearHistoryByScope
   } = useSearchStore();
 
-  const [showProfileMenu, setShowProfileMenu] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
+  const notificationRef = React.useRef<HTMLDivElement>(null);
+
+  const location = useLocation();
+  const formatMenuLabel = (path: string) => {
+    if (path === '/') return 'Dashboard';
+    const segment = path.substring(1).split('/')[0];
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  };
+  const menuLabel = formatMenuLabel(location.pathname);
+
   const [localSearchQuery, setLocalSearchQuery] = React.useState(searchQuery);
   const [derivedSearchResults, setDerivedSearchResults] = React.useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = React.useState(false);
@@ -108,8 +117,6 @@ export const Header = () => {
   }, [user, pendingSearchQuery, setPendingSearch]);
 
   const searchRef = React.useRef<HTMLDivElement>(null);
-  const notificationRef = React.useRef<HTMLDivElement>(null);
-  const profileRef = React.useRef<HTMLDivElement>(null);
 
   // Initialize data for search (memoized)
   const masterData = React.useMemo(() => ({
@@ -125,6 +132,9 @@ export const Header = () => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowSearchResults(false);
         setShowHistory(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
       }
     };
     document.addEventListener('mousedown', handleOutsideClick);
@@ -287,294 +297,47 @@ export const Header = () => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const handleMouseLeaveProfile = () => {
-    setShowProfileMenu(false);
-  };
-
   const handleMouseLeaveNotifications = () => {
     setShowNotifications(false);
   };
 
   const closeModal = () => setActiveModal(null);
 
+  const [isSearchModalOpen, setIsSearchModalOpen] = React.useState(false);
+  const [searchQueryToUse, setSearchQueryToUse] = React.useState('');
+  const [searchResultsToUse, setSearchResultsToUse] = React.useState<any[]>([]);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  const membersData = React.useMemo(() => generateMembers(150), []);
+
+  React.useEffect(() => {
+    if (isSearchModalOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+  }, [isSearchModalOpen]);
+
+  React.useEffect(() => {
+    if (searchQueryToUse.length >= 2) {
+      const q = searchQueryToUse.toLowerCase();
+      const results = membersData.filter(m => 
+        m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q)
+      ).slice(0, 8);
+      setSearchResultsToUse(results);
+    } else {
+      setSearchResultsToUse([]);
+    }
+  }, [searchQueryToUse, membersData]);
+
+  React.useEffect(() => {
+    const handleOpenModal = (e: any) => {
+      if (e.detail) setActiveModal(e.detail);
+    };
+    window.addEventListener('open-modal', handleOpenModal);
+    return () => window.removeEventListener('open-modal', handleOpenModal);
+  }, []);
+
   return (
-    <header className="h-16 bg-bg-app flex items-center justify-between px-8 z-30 transition-colors duration-300 border-b border-border-subtle">
-      <div className="flex items-center gap-4 flex-1">
-        <div 
-          className="flex items-center gap-3 w-full max-w-lg group relative" 
-          ref={searchRef}
-          onMouseLeave={() => {
-            setShowSearchResults(false);
-            setShowHistory(false);
-          }}
-        >
-          <form onSubmit={handleSearchSubmit} className="relative flex-1">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 pointer-events-none z-10">
-              {isSearching ? <Loader2 className="w-4 h-4 text-accent animate-spin" /> : <Search className="w-4 h-4 text-text-muted group-focus-within:text-accent transition-colors" />}
-            </div>
-            <input 
-              type="text" 
-              value={localSearchQuery}
-              onChange={(e) => setLocalSearchQuery(e.target.value)}
-              onFocus={() => {
-                if (localSearchQuery.length >= 2) {
-                  setShowSearchResults(true);
-                } else if (searchHistory.length > 0) {
-                  setShowHistory(true);
-                }
-              }}
-              placeholder="Global search (Members, Vendors, Cases...)"
-              className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-2xl pl-12 pr-4 h-11 text-[11px] font-black uppercase tracking-widest focus:ring-4 focus:ring-accent/10 focus:border-accent/40 outline-none transition-all text-text-primary placeholder:text-text-muted/60"
-            />
-            
-            <AnimatePresence>
-              {showHistory && searchHistory.length > 0 && !showSearchResults && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute left-0 top-full mt-3 w-full bg-card-bg rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden z-50 p-2"
-              >
-                <div className="px-4 py-3 flex items-center justify-between border-b border-border-subtle mb-1">
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-text-muted">Recent Search Intelligence</span>
-                </div>
-                
-                <div className="max-h-[40vh] overflow-y-auto no-scrollbar">
-                  {groupedHistory.slice(0, 5).map(([groupName, items]) => (
-                    <div key={groupName} className="mb-2 last:mb-0">
-                      <div className="px-4 py-2 bg-slate-50/50 dark:bg-slate-900/30">
-                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-text-muted/60">{groupName}</span>
-                      </div>
-                      {items.slice(0, 5).map((item, idx) => (
-                        <button
-                          key={`${groupName}-${idx}`}
-                          type="button"
-                          onClick={() => handleSearchSubmit(undefined, item.query)}
-                          className="w-full flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-2xl transition-all group text-left"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-bg-app flex items-center justify-center text-text-muted/60 group-hover:text-accent group-hover:bg-accent/10 transition-colors">
-                            <Search className="w-3.5 h-3.5" />
-                          </div>
-                          <span className="text-[11px] font-black text-text-primary uppercase tracking-tight flex-1">{item.query}</span>
-                          <ChevronRight className="w-4 h-4 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="px-4 py-3 border-t border-border-subtle mt-1 text-center">
-                  <button 
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowHistoryModal(true);
-                      setShowHistory(false);
-                    }}
-                    className="text-[10px] font-black uppercase tracking-[0.3em] text-accent hover:underline transition-colors"
-                  >
-                    View All History
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {showSearchResults && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute left-0 top-full mt-3 w-full bg-card-bg rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden z-50 p-2"
-              >
-                {derivedSearchResults.length > 0 ? (
-                  <div className="space-y-1">
-                    <div className="px-4 py-2 flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-text-muted">Direct Search Outcomes</span>
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-accent/50">{derivedSearchResults.length} Records</span>
-                    </div>
-                    {derivedSearchResults.slice(0, 8).map((result, idx) => (
-                      <button
-                        key={`${result.type}-${result.id}-${idx}`}
-                        type="button"
-                        onClick={() => handleResultClick(result)}
-                        className="w-full flex items-center gap-4 p-3 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-2xl transition-all group text-left"
-                      >
-                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-accent shadow-sm group-hover:scale-110 transition-transform">
-                          <result.icon className="w-4 h-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                             <span className="text-[12px] font-black text-text-primary uppercase tracking-tight truncate">{result.name}</span>
-                             <Badge className={cn("text-[7px] font-black border-none px-2 py-0.5 uppercase tracking-widest", 
-                               result.type === 'Member' ? 'bg-blue-500/10 text-blue-500' : 
-                               result.type === 'Vendor' ? 'bg-purple-500/10 text-purple-500' :
-                               result.type === 'Claim' ? 'bg-amber-500/10 text-amber-500' : 
-                               result.type === 'Plan' ? 'bg-orange-500/10 text-orange-500' :
-                               'bg-emerald-500/10 text-emerald-500'
-                             )}>
-                               {result.type}
-                             </Badge>
-                          </div>
-                          <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest truncate mt-0.5">ID: {result.id}</p>
-                        </div>
-                        <ChevronRight className="w-4 h-4 text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
-                    ))}
-                    {derivedSearchResults.length > 8 && (
-                      <button 
-                        type="button"
-                        onClick={() => handleSearchSubmit()}
-                        className="w-full py-3 text-center text-[10px] font-black uppercase tracking-widest text-accent hover:bg-slate-50 dark:hover:bg-slate-900 rounded-2xl transition-all border-t border-border-subtle"
-                      >
-                        View all matching records
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="p-10 text-center">
-                    <Search className="w-8 h-8 text-text-muted/20 mx-auto mb-4" />
-                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">No Intelligence Matches Found</p>
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-          </form>
-        </div>
-      </div>
-
-
-      <div className="flex items-center gap-3">
-        <button 
-          onClick={toggleTheme}
-          className="p-2.5 rounded-xl hover:bg-card-bg/50 text-text-muted transition-all active:scale-95"
-        >
-          {theme === 'light' ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5" />}
-        </button>
-
-        {/* NOTIFICATIONS */}
-        <div 
-          className="relative" 
-          onMouseLeave={handleMouseLeaveNotifications}
-        >
-          <button 
-            onMouseEnter={() => setShowNotifications(true)}
-            className="p-2.5 rounded-xl hover:bg-card-bg/50 text-text-muted relative transition-all active:scale-95"
-          >
-            <Bell className="w-4.5 h-4.5" />
-            {unreadCount > 0 && (
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-danger rounded-full border-2 border-bg-app" />
-            )}
-          </button>
-
-          <AnimatePresence>
-            {showNotifications && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-2 w-80 bg-card-bg rounded-3xl shadow-2xl overflow-hidden border border-border-subtle"
-              >
-                <div className="p-5 flex justify-between items-center bg-bg-app">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Unread Alerts ({notifications.length})</span>
-                  <button onClick={() => setNotifications([])} className="text-[10px] text-accent font-black uppercase tracking-widest hover:underline">Clear all</button>
-                </div>
-                <div className="max-h-96 overflow-y-auto no-scrollbar">
-                  {notifications.length > 0 ? (
-                    <div className="divide-y divide-border-subtle">
-                      {notifications.map(n => (
-                        <div 
-                          key={n.id} 
-                          onClick={() => markAsRead(n.id)}
-                          className="p-5 hover:bg-bg-app transition-all cursor-pointer group"
-                        >
-                          <div className="flex justify-between items-start mb-1">
-                            <h4 className="text-[11px] font-black text-text-primary uppercase tracking-tight">{n.title}</h4>
-                            <span className="text-[8px] text-text-muted opacity-40 uppercase font-black tabular-nums">{n.time}</span>
-                          </div>
-                          <p className="text-[10px] text-text-muted font-bold leading-relaxed">{n.desc}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-12 text-center">
-                       <ShieldCheck className="w-8 h-8 text-text-muted/20 mx-auto mb-4" />
-                       <p className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-relaxed opacity-40">System Secure<br/>Zero Operational Alerts</p>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="h-6 w-px bg-border-subtle mx-1" />
-
-        {/* USER PROFILE */}
-        <div 
-          className="relative"
-          onMouseLeave={handleMouseLeaveProfile}
-        >
-          <button 
-            onMouseEnter={() => setShowProfileMenu(true)}
-            className="flex items-center gap-3 pl-2 pr-1 py-1 rounded-2xl hover:bg-card-bg/50 transition-all group"
-          >
-            <div className="text-right hidden sm:block">
-              <p className="text-[11px] font-black text-text-primary leading-none uppercase">{user?.name}</p>
-              <p className="text-[9px] text-text-muted font-black uppercase tracking-widest mt-1.5 opacity-50">{user?.role}</p>
-            </div>
-            <AvatarIcon 
-              gender={user?.gender}
-              seedString={user?.name || user?.email}
-              className="w-10 h-10 rounded-xl overflow-hidden shadow-soft ring-2 ring-transparent group-hover:ring-accent/20 transition-all"
-            />
-          </button>
-
-          <AnimatePresence>
-            {showProfileMenu && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-2 w-64 bg-card-bg rounded-3xl shadow-2xl overflow-hidden border border-border-subtle"
-              >
-                <div className="p-6 bg-bg-app">
-                  <p className="text-[11px] font-black text-text-primary uppercase tracking-tight">{user?.name}</p>
-                  <p className="text-[9px] text-text-muted font-black uppercase tracking-widest mt-1 opacity-60 truncate">{user?.email}</p>
-                </div>
-                <div className="p-3 space-y-1">
-                  <button 
-                    onClick={() => { setActiveModal('profile'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase text-text-muted hover:bg-bg-app hover:text-accent rounded-2xl transition-all"
-                  >
-                    <User className="w-4 h-4" /> Profile
-                  </button>
-                  <button 
-                    onClick={() => { setActiveModal('settings'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase text-text-muted hover:bg-bg-app hover:text-accent rounded-2xl transition-all"
-                  >
-                    <Settings className="w-4 h-4" /> Account Settings
-                  </button>
-                  <button 
-                    onClick={() => { setActiveModal('preferences'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-[11px] font-black uppercase text-text-muted hover:bg-bg-app hover:text-accent rounded-2xl transition-all"
-                  >
-                    <CheckCircle2 className="w-4 h-4" /> Preferences
-                  </button>
-                  <div className="h-px bg-border-subtle my-2" />
-                  <button
-                    onClick={() => { setActiveModal('signout'); setShowProfileMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-4 text-[11px] font-black uppercase text-danger hover:bg-danger/10 rounded-2xl transition-all"
-                  >
-                    <LogOut className="w-4 h-4" /> Sign Out
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-
+    <>
       <AnimatePresence>
         {activeModal === 'profile' && <ProfileModal onClose={closeModal} onEdit={() => setActiveModal('edit')} />}
         {activeModal === 'edit' && <EditProfileModal onClose={closeModal} />}
@@ -596,7 +359,7 @@ export const Header = () => {
           />
         )}
       </AnimatePresence>
-    </header>
+    </>
   );
 };
 
@@ -809,8 +572,8 @@ function ProfileModal({ onClose, onEdit }: { onClose: () => void; onEdit: () => 
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">{user?.name}</h3>
-          <p className="text-sm font-black text-accent uppercase tracking-[0.3em]">{user?.role}</p>
+          <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">{user?.name || user?.email?.split('@')[0] || 'Agent 101'}</h3>
+          <p className="text-sm font-black text-accent uppercase tracking-[0.3em]">{user?.role || 'Agent'}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full pt-8 divide-x dark:divide-white/5 divide-slate-100">
@@ -892,8 +655,8 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          <Field label="First Name" value={user?.name.split(' ')[0]} />
-          <Field label="Last Name" value={user?.name.split(' ')[1]} />
+          <Field label="First Name" value={user?.name?.split(' ')[0] || user?.email?.split('@')[0] || ''} />
+          <Field label="Last Name" value={user?.name?.split(' ').slice(1).join(' ') || ''} />
           <Field label="Email Address" value={user?.email} type="email" />
           <Field label="Phone Number" value="+1 (555) 012-3456" />
         </div>

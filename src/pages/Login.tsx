@@ -40,7 +40,7 @@ export default function Login() {
     // In a real app, this would redirect or open a popup
   };
 
-  const isFormValid = username.length > 0 && password.length > 0;
+  const isFormValid = true;
 
   return (
     <div className="min-h-screen w-full relative flex flex-col items-center justify-center font-sans overflow-hidden p-6 selection:bg-accent/30">
@@ -174,10 +174,10 @@ export default function Login() {
       </div>
 
       {/* CENTRALIZED OPERATIONAL STACK */}
-      <div className="relative z-10 w-full max-w-6xl flex flex-col items-center gap-10 lg:gap-14">
+      <div className="relative z-10 w-full max-w-6xl flex flex-col items-center gap-6 lg:gap-6">
         
         {/* TOP BRANDING & AUTH SECTION (MEETING IN THE MIDDLE) */}
-        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-12 lg:gap-16 w-full">
+        <div className="flex flex-col lg:flex-row items-stretch justify-center gap-6 lg:gap-6 w-full">
           
           {/* BRANDING PANEL (RESTORED TO LEFT & ALIGNED) */}
           <motion.div 
@@ -188,7 +188,7 @@ export default function Login() {
           >
             {/* Top Aligned Identity */}
             <div className="flex items-center justify-center lg:justify-start gap-4">
-              <div className="w-12 h-12 bg-white flex items-center justify-center rounded-xl shadow-2xl">
+              <div className="w-12 h-12 bg-white flex items-center justify-center rounded-2xl shadow-2xl">
                 <ShieldCheck className="text-primary w-8 h-8" />
               </div>
               <h2 className="text-2xl font-black text-white tracking-tighter">Atlas <span className="text-blue-300">AI</span></h2>
@@ -215,14 +215,14 @@ export default function Login() {
              transition={{ duration: 0.8 }}
              className="w-full max-w-[480px]"
           >
-            <Card className="aspect-square flex flex-col p-8 lg:p-10 bg-white/10 dark:bg-white/5 backdrop-blur-3xl rounded-[2.5rem] shadow-[0_45px_150px_rgba(0,0,0,0.6)] border border-white/20 relative overflow-hidden justify-center group">
+            <Card className="aspect-square flex flex-col p-8 lg:p-10 bg-white/10 dark:bg-white/5 backdrop-blur-3xl rounded-2xl shadow-[0_45px_150px_rgba(0,0,0,0.6)] border border-white/20 relative overflow-hidden justify-center group">
               <AnimatePresence mode="wait">
                 {error && (
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="mb-6 bg-red-500/10 backdrop-blur-md border border-red-500/20 p-4 rounded-xl flex items-center gap-3"
+                    className="mb-6 bg-red-500/10 backdrop-blur-md border border-red-500/20 p-4 rounded-2xl flex items-center gap-3"
                   >
                     <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
                     <p className="text-[10px] font-black text-red-100 uppercase tracking-[0.2em]">{error}</p>
@@ -243,8 +243,7 @@ export default function Login() {
                             value={username}
                             onChange={(e) => { setUsername(e.target.value); if (error) clearError(); }}
                             placeholder=""
-                            className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-4 text-xs font-bold tracking-tight focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-white placeholder:opacity-10"
-                            required
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold tracking-tight focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-white placeholder:opacity-10"
                           />
                         </div>
                       </div>
@@ -258,8 +257,7 @@ export default function Login() {
                             value={password}
                             onChange={(e) => { setPassword(e.target.value); if (error) clearError(); }}
                             placeholder="••••••••"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-12 py-4 text-xs font-bold tracking-tight focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-white placeholder:opacity-10"
-                            required
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-xs font-bold tracking-tight focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/40 outline-none transition-all text-white placeholder:opacity-10"
                           />
                           <button 
                             type="button"
@@ -285,7 +283,7 @@ export default function Login() {
                           type="submit" 
                           disabled={!isFormValid || isAuthenticating}
                           className={cn(
-                            "w-full h-14 bg-white text-black hover:bg-gray-100 rounded-xl text-[10px] font-black uppercase tracking-[0.4em] transition-all transform active:scale-95 shadow-2xl",
+                            "w-full h-14 bg-white text-black hover:bg-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-[0.4em] transition-all transform active:scale-95 shadow-2xl",
                             (!isFormValid || isAuthenticating) && "opacity-50 grayscale"
                           )}
                         >
@@ -314,7 +312,7 @@ export default function Login() {
                           <button 
                             type="button" 
                             onClick={() => handleOAuth('google')}
-                            className="flex items-center justify-center gap-2 h-11 rounded-xl border border-white/5 bg-white/[0.02] text-white hover:bg-white/[0.05] transition-all font-black text-[9px] uppercase tracking-widest font-sans"
+                            className="flex items-center justify-center gap-2 h-11 rounded-2xl border border-white/5 bg-white/[0.02] text-white hover:bg-white/[0.05] transition-all font-black text-[9px] uppercase tracking-widest font-sans"
                           >
                             <img src="https://www.google.com/favicon.ico" className="w-3.5 h-3.5 grayscale opacity-50" alt="Google" />
                             Google
@@ -322,7 +320,7 @@ export default function Login() {
                           <button 
                             type="button" 
                             onClick={() => handleOAuth('x')}
-                            className="flex items-center justify-center gap-2 h-11 rounded-xl border border-white/5 bg-white/[0.02] text-white hover:bg-white/[0.05] transition-all font-black text-[9px] uppercase tracking-widest font-sans"
+                            className="flex items-center justify-center gap-2 h-11 rounded-2xl border border-white/5 bg-white/[0.02] text-white hover:bg-white/[0.05] transition-all font-black text-[9px] uppercase tracking-widest font-sans"
                           >
                             <div className="w-3.5 h-3.5 bg-white/20 rounded-sm flex items-center justify-center">
                               <span className="text-black text-[7px] font-black">X</span>
@@ -343,16 +341,16 @@ export default function Login() {
                       <input 
                         type="text" 
                         placeholder="Full Name"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-xs font-bold text-white focus:border-blue-400/40"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:border-blue-400/40"
                         required
                       />
                       <input 
                         type="email" 
                         placeholder="Work Email"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-xs font-bold text-white focus:border-blue-400/40"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs font-bold text-white focus:border-blue-400/40"
                         required
                       />
-                      <Button className="w-full h-14 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest">
+                      <Button className="w-full h-14 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">
                         Submit
                       </Button>
                       <button 
@@ -375,11 +373,11 @@ export default function Login() {
                         <input 
                           type="email" 
                           placeholder="Registered Identifier"
-                          className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-5 text-xs font-bold text-white focus:border-blue-400/40"
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl pl-12 pr-4 py-5 text-xs font-bold text-white focus:border-blue-400/40"
                           required
                         />
                       </div>
-                      <Button className="w-full h-14 bg-white text-black rounded-xl text-[10px] font-black uppercase tracking-widest">
+                      <Button className="w-full h-14 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest">
                         Send Recovery
                       </Button>
                       <button 
@@ -401,10 +399,10 @@ export default function Login() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-2xl px-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl px-6"
         >
-          <div className="flex items-center gap-5 p-6 rounded-[2rem] bg-white/[0.02] border border-white/[0.05] backdrop-blur-md">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
+          <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-md">
+            <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
               <Shield className="w-5 h-5 text-white/40" />
             </div>
             <div className="space-y-1">
@@ -412,8 +410,8 @@ export default function Login() {
               <p className="text-[9px] text-white/30 leading-tight font-bold uppercase tracking-tight">SOC2 Type II & HIPAA certified clusters.</p>
             </div>
           </div>
-          <div className="flex items-center gap-5 p-6 rounded-[2rem] bg-white/[0.02] border border-white/[0.05] backdrop-blur-md">
-            <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
+          <div className="flex items-center gap-5 p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] backdrop-blur-md">
+            <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
               <Sparkles className="w-5 h-5 text-white/40" />
             </div>
             <div className="space-y-1">

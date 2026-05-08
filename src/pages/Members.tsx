@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
 import { AvatarIcon } from "@/components/ui/AvatarIcon";
 import { generateMembers } from "@/utils/dummyData";
+import { useLocation } from "react-router-dom";
 import {
   Search,
   UserPlus,
@@ -37,6 +38,23 @@ import {
 import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "motion/react";
 import { HipaModal } from "@/components/feedback/HipaModal";
+import { SimpleAuthModal } from "@/components/feedback/SimpleAuthModal";
+import { useAuth } from "@/store/authStore";
+
+const HipaaBadge = ({ hipaaVerificationState }: { hipaaVerificationState: string }) => {
+  if (hipaaVerificationState !== "VERIFIED") {
+    return null;
+  }
+
+  return (
+    <div style={{ transform: 'translateX(-700px)' }} className="pointer-events-none flex items-center justify-center">
+      <div className="bg-slate-900 dark:bg-slate-800 border border-slate-700/50 shadow-sm rounded-full h-[32px] px-3 flex items-center gap-2">
+        <CheckCircle className="w-3.5 h-3.5 text-blue-400" />
+        <span className="text-[10px] font-bold tracking-widest text-white uppercase mt-px">HIPAA <span className="text-success">COMPLIANT</span></span>
+      </div>
+    </div>
+  );
+};
 
 const ALL_MEMBERS = generateMembers(128);
 
@@ -172,6 +190,7 @@ export function ClientProfilePanel({
   MOCK_POLICIES: prop_MOCK_POLICIES,
   MOCK_CLAIMS: prop_MOCK_CLAIMS,
   MOCK_CASES: prop_MOCK_CASES,
+  sessionLogs,
 }: any) {
   const [activities, setActivities] = React.useState<any[]>([]);
   const [policies, setPolicies] = React.useState<any[]>([]);
@@ -182,46 +201,36 @@ export function ClientProfilePanel({
   React.useEffect(() => {
     let active = true;
     if (active) {
-      setActivities(prop_MOCK_ACTIVITIES);
-      setPolicies(prop_MOCK_POLICIES);
-      setClaims(
-        [...prop_MOCK_CLAIMS].sort(
-          (a, b) =>
-            new Date(b.date || b.timestamp || 0).getTime() -
-            new Date(a.date || a.timestamp || 0).getTime(),
-        ),
-      );
-      setCases(
-        [...prop_MOCK_CASES].sort(
-          (a, b) =>
-            new Date(b.date || b.updatedAt || 0).getTime() -
-            new Date(a.date || a.updatedAt || 0).getTime(),
-        ),
-      );
+      if (!selectedMember) return;
+      const memName = selectedMember.name || "Client";
+      const lastName = memName.split(" ").slice(-1)[0] || "Doe";
+
+      setActivities([
+        ...(sessionLogs?.filter((l: any) => l.memberId === selectedMember.id) || []),
+        ...(prop_MOCK_ACTIVITIES || [])
+      ]);
+      setPolicies(prop_MOCK_POLICIES || []);
+      setClaims(prop_MOCK_CLAIMS || []);
+      setCases(prop_MOCK_CASES || []);
     }
     return () => {
       active = false;
     };
-  }, [
-    selectedMember.id,
-    prop_MOCK_ACTIVITIES,
-    prop_MOCK_POLICIES,
-    prop_MOCK_CLAIMS,
-    prop_MOCK_CASES,
-  ]);
+  }, [selectedMember, sessionLogs, prop_MOCK_ACTIVITIES, prop_MOCK_POLICIES, prop_MOCK_CLAIMS, prop_MOCK_CASES]);
 
   return (
     <div
       key={selectedMember.id}
       className="flex-1 w-full flex flex-col max-w-full overflow-hidden h-full"
     >
-      <Card className="p-6 border-none bg-white dark:bg-[#1F2937] rounded-3xl shadow-soft flex flex-col xl:flex-row gap-6 items-start w-full shrink-0 mb-6">
-        <div className="flex flex-col items-center gap-4 shrink-0">
-          <div className="text-center">
-            <span className="text-accent font-black tracking-[0.2em] text-[10px] tabular-nums mb-1 uppercase opacity-70">
+      <Card className="relative p-6 border-none bg-white dark:bg-[#1F2937] rounded-2xl shadow-soft flex flex-col xl:flex-row gap-6 items-start w-full shrink-0 mb-[10px]">
+        <div className="flex flex-col items-center gap-[10px] shrink-0 w-full xl:w-32 relative">
+          <div className="text-center w-full">
+            <span className="text-accent font-black tracking-[0.2em] text-[10px] tabular-nums uppercase opacity-70 block leading-none h-[10px]">
               {selectedMember.id}
             </span>
           </div>
+
           <div className="w-32 h-32 rounded-2xl bg-slate-50 dark:bg-black/20 flex items-center justify-center relative shadow-xl overflow-hidden group border-4 border-white dark:border-slate-800">
             <AvatarIcon
               gender={selectedMember.gender || selectedMember.sex || "UNKNOWN"}
@@ -229,14 +238,14 @@ export function ClientProfilePanel({
               className="w-full h-full"
             />
           </div>
-          <div className="text-center">
+          <div className="text-center flex flex-col gap-2 mt-[2px] w-full items-center">
             <Badge className="bg-success/10 text-success border-none text-[8px] px-3 py-1 font-semibold tracking-wider uppercase">
               Active Member
             </Badge>
           </div>
         </div>
 
-        <div className="flex-1 w-full flex flex-col justify-center h-full xl:pl-2">
+        <div className="flex-1 w-full flex flex-col justify-start h-full xl:pl-2 pt-[20px] pr-16 xl:pr-24">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-6">
             {[
               {
@@ -266,9 +275,9 @@ export function ClientProfilePanel({
         </div>
       </Card>
 
-      <Card className="bg-white dark:bg-[#1F2937] border-none shadow-soft flex flex-col rounded-3xl flex-1 min-h-0 overflow-hidden !p-[0px] !px-[0px] !pt-[15px] !pb-[15px]">
+      <Card className="bg-white dark:bg-[#1F2937] border-none shadow-soft flex flex-col rounded-2xl flex-1 min-h-0 overflow-hidden !p-[0px] !px-[0px] !pt-[15px] !pb-[15px]">
         {/* CTA TABS */}
-        <div className="flex flex-wrap items-center gap-2 px-6 !py-[0px] !mt-[10px] !mb-[10px] border-b border-border-subtle dark:border-white/5 shrink-0 justify-start">
+        <div className="flex flex-wrap items-center gap-2 px-6 !mt-[10px] !pb-[15px] !mb-[10px] border-b border-border-subtle dark:border-white/5 shrink-0 justify-start">
           {[
             { id: "activity", label: "Activity Log" },
             { id: "policy", label: "Policy" },
@@ -283,7 +292,7 @@ export function ClientProfilePanel({
                 )
               }
               className={cn(
-                "flex-1 min-w-[100px] max-w-[140px] px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-center",
+                "flex-1 min-w-[100px] max-w-[140px] px-3 py-1.5 rounded-2xl text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 text-center",
                 activeTab === tab.id
                   ? "bg-accent text-white shadow-md shadow-accent/20"
                   : "bg-slate-100 dark:bg-white/5 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/10",
@@ -343,7 +352,7 @@ export function ClientProfilePanel({
                             className="grid grid-cols-[40px_minmax(140px,2fr)_minmax(100px,1fr)_minmax(100px,1fr)_minmax(80px,1fr)] justify-start gap-4 items-center p-3 bg-slate-50/30 dark:bg-white/5 border border-transparent rounded-2xl hover:border-border-subtle dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-white/5 cursor-pointer transition-all group/item"
                             onClick={() => setSelectedActivity(event)}
                           >
-                            <div className="w-10 h-10 rounded-xl bg-trust/10 text-trust flex items-center justify-center shrink-0 group-hover/item:bg-trust group-hover/item:text-white transition-colors">
+                            <div className="w-10 h-10 rounded-2xl bg-trust/10 text-trust flex items-center justify-center shrink-0 group-hover/item:bg-trust group-hover/item:text-white transition-colors">
                               <Clock className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col min-w-0 pr-2">
@@ -490,7 +499,7 @@ export function ClientProfilePanel({
                             onClick={() => setSelectedPolicy(policy.id)}
                             className="grid grid-cols-[40px_minmax(140px,2fr)_minmax(100px,1fr)_minmax(100px,1fr)_minmax(80px,1fr)] justify-start gap-4 items-center p-3 bg-slate-50/30 dark:bg-white/5 border border-transparent rounded-2xl hover:border-border-subtle dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-white/5 cursor-pointer transition-all group/item"
                           >
-                            <div className="w-10 h-10 rounded-xl bg-trust/10 text-trust flex items-center justify-center shrink-0 group-hover/item:bg-trust group-hover/item:text-white transition-colors">
+                            <div className="w-10 h-10 rounded-2xl bg-trust/10 text-trust flex items-center justify-center shrink-0 group-hover/item:bg-trust group-hover/item:text-white transition-colors">
                               <ClipboardList className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col min-w-0 pr-2">
@@ -526,7 +535,7 @@ export function ClientProfilePanel({
                     if (!policy) return null;
                     return (
                       <>
-                        <div className="grid grid-cols-2 gap-8">
+                        <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-1.5 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-transparent">
                             <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
                               Plan Type
@@ -555,7 +564,7 @@ export function ClientProfilePanel({
                                 <div
                                   key={dep.id}
                                   onClick={() => setSelectedDependent(dep)}
-                                  className="flex items-center justify-between p-4 bg-white dark:bg-[#1F2937] border border-border-subtle rounded-xl cursor-pointer hover:border-trust transition-colors"
+                                  className="flex items-center justify-between p-4 bg-white dark:bg-[#1F2937] border border-border-subtle rounded-2xl cursor-pointer hover:border-trust transition-colors"
                                 >
                                   <div className="flex items-center gap-3">
                                     <User className="w-4 h-4 text-trust" />
@@ -632,7 +641,7 @@ export function ClientProfilePanel({
                           onClick={() => setSelectedClaim(claim)}
                           className="grid grid-cols-[40px_minmax(140px,2fr)_minmax(100px,1fr)_minmax(100px,1fr)_minmax(80px,1fr)] justify-start gap-4 items-center p-3 bg-slate-50/30 dark:bg-white/5 border border-transparent rounded-2xl hover:border-border-subtle dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-white/5 cursor-pointer transition-all group/item"
                         >
-                          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 group-hover/item:bg-indigo-500 group-hover/item:text-white transition-colors">
+                          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 group-hover/item:bg-indigo-500 group-hover/item:text-white transition-colors">
                             <FileText className="w-5 h-5" />
                           </div>
                           <div className="flex flex-col min-w-0 pr-2">
@@ -770,7 +779,7 @@ export function ClientProfilePanel({
                           onClick={() => setSelectedCase(item)}
                           className="grid grid-cols-[40px_minmax(140px,2fr)_minmax(100px,1fr)_minmax(100px,1fr)_minmax(80px,1fr)] justify-start gap-4 items-center p-3 bg-slate-50/30 dark:bg-white/5 border border-transparent rounded-2xl hover:border-border-subtle dark:hover:border-white/10 hover:bg-slate-50/50 dark:hover:bg-white/5 cursor-pointer transition-all group/item"
                         >
-                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0 group-hover/item:bg-orange-500 group-hover/item:text-white transition-colors">
+                          <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0 group-hover/item:bg-orange-500 group-hover/item:text-white transition-colors">
                             <Briefcase className="w-5 h-5" />
                           </div>
                           <div className="flex flex-col min-w-0 pr-2">
@@ -858,23 +867,28 @@ export function ClientProfilePanel({
 }
 
 export default function Members() {
+  const { user } = useAuth();
+  const location = useLocation();
+  const highlightMemberId = location.state?.highlightMemberId;
+
   const [membersData, setMembersData] = React.useState<any[]>(ALL_MEMBERS);
   const [selectedMember, setSelectedMember] = React.useState<any>(null);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(20);
   const [currentPage, setCurrentPage] = React.useState(1);
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isClientEnrollModalOpen, setIsClientEnrollModalOpen] =
     React.useState(false);
   const [selectedActivity, setSelectedActivity] = React.useState<any>(null);
   const [selectedPolicy, setSelectedPolicy] = React.useState<any>(null);
   const [timelinePage, setTimelinePage] = React.useState(1);
-  const [timelinePageSize, setTimelinePageSize] = React.useState(10);
+  const [timelinePageSize, setTimelinePageSize] = React.useState(20);
   const [policyPage, setPolicyPage] = React.useState(1);
-  const [policyPageSize, setPolicyPageSize] = React.useState(10);
+  const [policyPageSize, setPolicyPageSize] = React.useState(20);
   const [claimsPage, setClaimsPage] = React.useState(1);
-  const [claimsPageSize, setClaimsPageSize] = React.useState(10);
+  const [claimsPageSize, setClaimsPageSize] = React.useState(20);
   const [casesPage, setCasesPage] = React.useState(1);
-  const [casesPageSize, setCasesPageSize] = React.useState(10);
+  const [casesPageSize, setCasesPageSize] = React.useState(20);
   const [selectedDependent, setSelectedDependent] = React.useState<any>(null);
   const [selectedClaim, setSelectedClaim] = React.useState<any>(null);
   const [selectedCase, setSelectedCase] = React.useState<any>(null);
@@ -884,25 +898,95 @@ export default function Members() {
   >("activity");
 
   const [actionVerificationType, setActionVerificationType] = React.useState<
-    "Edit" | "Delete" | null
+    "Edit" | "Delete" | "View" | null
   >(null);
+  
+  const [hipaaVerificationState, setHipaaVerificationState] = React.useState<
+    "IDLE" | "ACTIVE" | "VERIFIED" | "DENIED" | "FAILED" | "EXPIRED" | "CANCELLED"
+  >("IDLE");
+  
   const [memberActionTarget, setMemberActionTarget] = React.useState<any>(null);
+  const [sessionLogs, setSessionLogs] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    let inactivityTimer: NodeJS.Timeout;
+    let totalTimer: NodeJS.Timeout;
+
+    if (hipaaVerificationState === "ACTIVE" || hipaaVerificationState === "VERIFIED") {
+      const resetToIdle = () => setHipaaVerificationState("IDLE");
+
+      // 30 minutes inactivity
+      inactivityTimer = setTimeout(resetToIdle, 30 * 60 * 1000);
+      
+      // 1 hour total lifecycle
+      totalTimer = setTimeout(resetToIdle, 60 * 60 * 1000);
+
+      const resetInactivity = () => {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(resetToIdle, 30 * 60 * 1000);
+      };
+
+      const events = ['mousemove', 'keydown', 'scroll', 'click'];
+      events.forEach(e => window.addEventListener(e, resetInactivity));
+
+      return () => {
+        clearTimeout(inactivityTimer);
+        clearTimeout(totalTimer);
+        events.forEach(e => window.removeEventListener(e, resetInactivity));
+      };
+    }
+  }, [hipaaVerificationState]);
+
+  React.useEffect(() => {
+    if (highlightMemberId) {
+      const member = ALL_MEMBERS.find((m) => m.id === highlightMemberId);
+      if (member) {
+        handleViewMember(member);
+        window.history.replaceState({}, document.title);
+      }
+    }
+  }, [highlightMemberId]);
 
   const sortedMembersData = React.useMemo(() => {
-    return [...membersData].sort((a, b) => a.name.localeCompare(b.name));
-  }, [membersData]);
+    let filtered = [...membersData];
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(m => 
+        m.name.toLowerCase().includes(q) || 
+        m.id.toLowerCase().includes(q)
+      );
+    }
+    return filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }, [membersData, searchQuery]);
   const totalPages = Math.ceil(sortedMembersData.length / pageSize);
   const currentMembers = sortedMembersData.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize,
   );
 
-  const handleViewMember = (member: any) => {
+  const handleViewMemberDirect = (member: any) => {
     setSelectedMember(member);
     setTimelinePage(1);
     setPolicyPage(1);
     setClaimsPage(1);
     setCasesPage(1);
+
+    const newLog = {
+      memberId: member.id,
+      id: `ACT-SEC-${Date.now()}`,
+      description: `Profile accessed directly via Client Menu`,
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      status: "Logged",
+      agent: user?.name || "Current User",
+    };
+    setSessionLogs((prev) => [newLog, ...prev]);
+  };
+
+  const handleViewMember = (member: any) => {
+    setSelectedMember(member);
+    setMemberActionTarget(member);
+    setActionVerificationType("View");
+    setHipaaVerificationState("ACTIVE");
   };
 
   const handleEditClick = (member: any) => {
@@ -916,7 +1000,22 @@ export default function Members() {
   };
 
   const handleVerificationSuccess = (method: string) => {
-    if (actionVerificationType === "Edit") {
+    if (actionVerificationType === "View") {
+      setTimelinePage(1);
+      setPolicyPage(1);
+      setClaimsPage(1);
+      setCasesPage(1);
+
+      const newLog = {
+        memberId: memberActionTarget.id,
+        id: `ACT-SEC-${Date.now()}`,
+        description: `Profile accessed securely via HIPAA Verification (${method})`,
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        status: "Logged",
+        agent: user?.name || "Current User",
+      };
+      setSessionLogs((prev) => [newLog, ...prev]);
+    } else if (actionVerificationType === "Edit") {
       setSelectedMember(memberActionTarget);
       setIsEditModalOpen(true);
     } else if (actionVerificationType === "Delete") {
@@ -957,43 +1056,108 @@ export default function Members() {
         setSize(newSize);
         setPage(1);
       }}
-      className="bg-transparent !mt-[10px] !pt-[15px] !pb-0 !px-6 w-full"
-      minimal={true}
+      className="shrink-0 w-full"
     />
   );
 
   return (
-    <div className="space-y-8 h-full flex flex-col">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 shrink-0">
-        <div>
-          {selectedMember ? (
-            <button
-              onClick={() => setSelectedMember(null)}
-              className="text-text-muted dark:text-slate-500 hover:text-accent flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider transition-all"
-            >
-              <ChevronLeft className="w-4 h-4" /> Back to Registry
-            </button>
-          ) : (
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">
-                Clients Directory
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2">
+    <div className="flex flex-col gap-[10px] pb-0 m-0 h-full min-h-0 animate-in fade-in duration-700">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[15px] shrink-0">
+        <div className="flex items-center flex-1 min-w-0 mr-8">
+          <div className={cn(
+            "shrink-0 flex flex-col justify-center min-w-0 transition-all duration-300",
+            selectedMember ? "w-auto" : "w-[270px]"
+          )}>
+            <div className="min-w-0 shrink">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase shrink-0">
+                  Search Client:
+                </h1>
+                <div className="relative flex-1 max-w-[300px]">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Enter name..."
+                    className="w-full h-10 pl-9 pr-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-semibold text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-accent/50 transition-all placeholder:text-slate-400 placeholder:font-normal"
+                  />
+                </div>
+              </div>
+              <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2 truncate">
                 Comprehensive Client Management
               </p>
+            </div>
+            {selectedMember && (
+              <button
+                onClick={() => setSelectedMember(null)}
+                className="text-text-muted dark:text-slate-500 hover:text-accent flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider transition-all mt-4 w-max"
+              >
+                <ChevronLeft className="w-4 h-4" /> Back to Registry
+              </button>
+            )}
+          </div>
+          {!selectedMember && <div className="w-[20px] shrink-0" />}
+          {!selectedMember && (
+            <div className="h-12 w-px bg-border-subtle dark:bg-white/10 shrink-0" />
+          )}
+          {!selectedMember && <div className="w-[20px] shrink-0" />}
+          
+          {!selectedMember && (
+            <div className="flex-1 min-w-0 flex flex-nowrap items-center gap-4">
+              {[
+                {
+                  label: "Total Clients",
+                    value: "14,284",
+                    icon: Users,
+                  },
+                  {
+                    label: "Active Clients",
+                    value: "12,042",
+                    icon: UserCheck,
+                  },
+                  {
+                    label: "Pending Clients",
+                    value: "1,842",
+                    icon: Clock,
+                  },
+                  {
+                    label: "Terminated Clients",
+                    value: "400",
+                    icon: UserX,
+                  },
+                ].map((s) => (
+                  <Card
+                    key={s.label}
+                    className="px-5 py-4 flex flex-row items-center justify-start gap-4 h-[84px] bg-card-bg shadow-soft border-none relative transition-all hover:bg-accent/5 group rounded-2xl flex-1 min-w-0 shrink-0"
+                  >
+                    <div className="flex flex-col justify-center">
+                      <s.icon className="w-[30px] h-[30px] text-accent shrink-0 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                    </div>
+                    <div className="flex flex-col justify-center min-w-0">
+                      <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none truncate">
+                        {s.label}
+                      </div>
+                      <div className="text-[22px] font-black text-slate-900 dark:text-white tabular-nums tracking-tight leading-none truncate">
+                        {s.value}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
             </div>
           )}
         </div>
         {!selectedMember ? (
           <Button
+            variant="primaryAction"
+            size="primaryAction"
             onClick={() => setIsClientEnrollModalOpen(true)}
-            size="sm"
-            className="h-14 bg-accent hover:opacity-90 text-white font-semibold uppercase text-[12px] tracking-wider px-12 shadow-xl shadow-accent/20 border-none rounded-2xl transition-all flex items-center gap-3"
           >
-            <UserPlus className="w-5 h-5" /> Enroll
+            <UserPlus className="w-5 h-5 flex-shrink-0" /> ENROLL CLIENT
           </Button>
         ) : (
           <div className="flex items-center gap-3">
+            <HipaaBadge hipaaVerificationState={hipaaVerificationState} />
             <Button
               variant="outline"
               size="sm"
@@ -1003,7 +1167,7 @@ export default function Members() {
               }}
               className="bg-white dark:bg-[#1F2937] border-none shadow-soft font-semibold h-12 px-6 uppercase tracking-wider text-[12px] hover:text-accent transition-all"
             >
-              <Edit className="w-4 h-4 mr-2" /> Edit Client
+              Edit Client
             </Button>
             <Button
               variant="outline"
@@ -1020,111 +1184,58 @@ export default function Members() {
         )}
       </div>
 
-      {!selectedMember && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
-          {[
-            {
-              label: "Total Clients",
-              value: "14,284",
-              icon: Users,
-              color: "bg-accent",
-            },
-            {
-              label: "Active Clients",
-              value: "12,042",
-              icon: UserCheck,
-              color: "bg-success",
-            },
-            {
-              label: "Pending Clients",
-              value: "1,842",
-              icon: Clock,
-              color: "bg-indigo-600",
-            },
-            {
-              label: "Terminated Clients",
-              value: "400",
-              icon: UserX,
-              color: "bg-danger",
-            },
-          ].map((s) => (
-            <Card
-              key={s.label}
-              className="p-6 bg-card-bg border-none shadow-soft rounded-[2rem] flex items-center gap-6"
-            >
-              <div
-                className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0",
-                  s.color,
-                )}
-              >
-                <s.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-                  {s.label}
-                </p>
-                <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">
-                  {s.value}
-                </h4>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-
       <div
         className={cn(
-          "flex gap-8 relative flex-col lg:flex-row flex-1 min-h-0",
+          "flex gap-[15px] relative flex-col lg:flex-row w-full shrink-0 h-[900px] m-0 items-stretch",
           selectedMember ? "items-stretch" : "items-stretch",
         )}
       >
         {/* LEFT: Entity Registry */}
         <div
           className={cn(
-            "w-full shrink-0 flex flex-col",
+            "w-full flex flex-col h-full shrink-0 min-w-0 transition-all duration-500",
             selectedMember
-              ? "lg:w-[250px] xl:w-[300px] h-full"
-              : "min-w-0 flex-1 h-full min-h-0",
+              ? "hidden lg:flex lg:w-[280px] xl:w-[320px]"
+              : "flex-1 min-w-0",
           )}
         >
           <Card
             className={cn(
-              "overflow-hidden border-none shadow-soft flex flex-col h-full flex-1 min-h-0",
+              "overflow-hidden border-none shadow-soft flex flex-col h-full shrink-0",
               selectedMember
-                ? "bg-white dark:bg-[#1F2937] rounded-3xl"
-                : "bg-card-bg rounded-xl",
+                ? "bg-white dark:bg-[#1F2937] rounded-2xl"
+                : "bg-card-bg rounded-2xl",
             )}
           >
-            <div className="flex-1 overflow-auto no-scrollbar">
+            <div className="w-full flex-1 overflow-auto min-h-0 relative">
               <table
                 className={cn(
                   "w-full border-collapse table-fixed",
                   selectedMember ? "min-w-[200px]" : "min-w-[1200px]",
                 )}
               >
-                <thead className="sticky top-0 z-10 bg-bg-app">
-                  <tr className={cn(!selectedMember && "bg-bg-app")}>
+                <thead className="bg-bg-app sticky top-0 z-10 shadow-[0_1px_0_0_theme(colors.border.subtle)]">
+                  <tr className="bg-bg-app">
                     <th
                       className={cn(
-                        "px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] text-left align-middle",
+                        "h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] text-left align-middle",
                         selectedMember ? "w-full" : "w-1/5",
                       )}
                     >
-                      List of Clients
+                      Client Name
                     </th>
                     {!selectedMember && (
                       <>
-                        <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">
+                        <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">
                           Email
                         </th>
-                        <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">
+                        <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">
                           Date Registered
                         </th>
-                        <th className="px-10 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-center align-middle">
+                        <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">
+                          Status
+                        </th>
+                        <th className="h-[46px] py-0 px-10 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-center align-middle">
                           Action
                         </th>
                       </>
@@ -1135,8 +1246,8 @@ export default function Members() {
                   {currentMembers.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
-                        className="px-6 py-12 text-center text-[11px] font-black uppercase tracking-widest text-text-muted"
+                        colSpan={5}
+                        className="h-[54px] py-0 px-6 text-center text-[11px] font-black uppercase tracking-widest text-text-muted"
                       >
                         No records found.
                       </td>
@@ -1156,28 +1267,22 @@ export default function Members() {
                         )}
                         onClick={
                           selectedMember
-                            ? () => handleViewMember(member)
+                            ? () => handleViewMemberDirect(member)
                             : undefined
                         }
                       >
-                        <td className="px-6 py-2.5 text-left">
-                          <div className="flex flex-col items-start min-w-0 pr-4">
-                            <span className="text-accent font-black tracking-[0.2em] text-[10px] tabular-nums mb-1 uppercase opacity-70">
-                              {member.id}
-                            </span>
-                            <span className="font-black text-text-primary dark:text-white uppercase tracking-tight text-[13px] leading-tight truncate w-full">
-                              {member.name}
-                            </span>
-                          </div>
+                        <td className="h-[54px] py-0 px-6 font-black text-text-primary uppercase tracking-tight text-sm truncate text-left">
+                          {member.name}
                         </td>
                         {!selectedMember && (
                           <>
-                            <td className="px-6 py-2.5 text-left">
-                              <span className="text-text-primary dark:text-white font-black uppercase tracking-widest text-[11px] tabular-nums truncate block">
-                                {member.email}
-                              </span>
+                            <td className="h-[54px] py-0 px-6 font-black text-text-primary uppercase tracking-widest text-[11px] tabular-nums text-left">
+                              {member.email}
                             </td>
-                            <td className="px-6 py-2.5 text-left">
+                            <td className="h-[54px] py-0 px-6 text-text-muted font-bold uppercase tracking-widest text-[10px] truncate text-left">
+                              {member.enrollmentDate}
+                            </td>
+                            <td className="h-[54px] py-0 px-6 text-left">
                               <Badge
                                 className={cn(
                                   "text-[8.5px] font-black uppercase tracking-[0.2em] px-3 py-1 border-none shadow-none",
@@ -1191,17 +1296,12 @@ export default function Members() {
                                 {member.status}
                               </Badge>
                             </td>
-                            <td className="px-6 py-2.5 text-left">
-                              <span className="text-text-muted font-bold tracking-widest uppercase text-[10px] tabular-nums block truncate">
-                                {member.enrollmentDate}
-                              </span>
-                            </td>
-                            <td className="px-10 py-2.5 text-center align-middle">
+                            <td className="h-[54px] py-0 px-10 text-center align-middle">
                               <div className="flex items-center justify-center gap-2">
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    handleViewMember(member);
+                                    handleViewMemberDirect(member);
                                   }}
                                   className="p-2 text-text-muted hover:text-accent transition-all transform active:scale-90"
                                   title="View / Entity Registry"
@@ -1239,15 +1339,44 @@ export default function Members() {
               </table>
             </div>
 
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              pageSize={pageSize}
-              totalRecords={ALL_MEMBERS.length}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-              minimal={!!selectedMember}
-            />
+            {/* Custom Pagination for Clients List */}
+            <div className="flex flex-col items-center justify-center px-4 pt-3 pb-3 shrink-0 border-t border-border-subtle bg-card-bg m-0 mt-auto w-full">
+              <div className="flex items-center justify-between w-full max-w-[400px] text-[10px] uppercase tracking-wider font-semibold text-text-muted mb-2">
+                <div className="flex items-center gap-2">
+                  <span>Show</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                    className="bg-bg-app border border-border-subtle rounded px-1 outline-none focus:ring-2 focus:ring-accent/20 transition-all cursor-pointer h-5 text-[10px]"
+                  >
+                    {[10, 20, 50, 100].map(size => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                  <span>records</span>
+                </div>
+                <div>Total: <span className="text-text-primary">{ALL_MEMBERS.length}</span></div>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                </button>
+                <div className="text-[10px] font-black uppercase tracking-widest text-text-muted w-[80px] text-center">
+                   Page {currentPage} / {Math.max(1, totalPages)}
+                </div>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="w-6 h-6 flex items-center justify-center rounded border border-border-subtle bg-card-bg text-text-muted hover:text-accent disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                >
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </Card>
         </div>
 
@@ -1296,6 +1425,7 @@ export default function Members() {
               MOCK_POLICIES={MOCK_POLICIES}
               MOCK_CLAIMS={MOCK_CLAIMS}
               MOCK_CASES={MOCK_CASES}
+              sessionLogs={sessionLogs}
             />
           )}
 
@@ -1343,13 +1473,27 @@ export default function Members() {
       {/* MODALS */}
       <AnimatePresence>
         <HipaModal
-          isOpen={actionVerificationType !== null}
+          isOpen={hipaaVerificationState === "ACTIVE"}
+          onClose={() => {
+            setHipaaVerificationState("CANCELLED");
+            setTimeout(() => setHipaaVerificationState("IDLE"), 0);
+            setActionVerificationType(null);
+            setMemberActionTarget(null);
+          }}
+          onVerify={(method) => {
+            setHipaaVerificationState("VERIFIED");
+            handleVerificationSuccess(method);
+          }}
+          actionType={actionVerificationType}
+        />
+        <SimpleAuthModal
+          isOpen={actionVerificationType === "Edit" || actionVerificationType === "Delete"}
           onClose={() => {
             setActionVerificationType(null);
             setMemberActionTarget(null);
           }}
-          onVerify={handleVerificationSuccess}
-          actionType={actionVerificationType}
+          onVerify={() => handleVerificationSuccess('Password')}
+          actionType={actionVerificationType === "Edit" || actionVerificationType === "Delete" ? actionVerificationType : null}
         />
         {selectedActivity && (
           <DetailModal
@@ -1459,7 +1603,7 @@ function DetailModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-white/5"
+        className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/5"
       >
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/20">
           <div>
@@ -1476,14 +1620,14 @@ function DetailModal({
               <Button
                 onClick={handleEditClick}
                 variant="outline"
-                className="h-10 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border-border-subtle hover:text-trust"
+                className="h-10 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest border-border-subtle hover:text-trust"
               >
                 Edit Profile
               </Button>
             )}
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
+              className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1509,7 +1653,7 @@ function DetailModal({
                 <button
                   onClick={() => setVerificationMethod("OTP")}
                   className={cn(
-                    "p-4 rounded-xl border-2 transition-all text-center",
+                    "p-4 rounded-2xl border-2 transition-all text-center",
                     verificationMethod === "OTP"
                       ? "border-trust bg-trust/5 text-trust"
                       : "border-border-subtle dark:border-white/5 text-text-muted hover:border-trust",
@@ -1522,7 +1666,7 @@ function DetailModal({
                 <button
                   onClick={() => setVerificationMethod("FTA")}
                   className={cn(
-                    "p-4 rounded-xl border-2 transition-all text-center",
+                    "p-4 rounded-2xl border-2 transition-all text-center",
                     verificationMethod === "FTA"
                       ? "border-trust bg-trust/5 text-trust"
                       : "border-border-subtle dark:border-white/5 text-text-muted hover:border-trust",
@@ -1547,7 +1691,7 @@ function DetailModal({
               />
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 gap-6">
               {Object.entries(data)
                 .filter(([k]) => k !== "dependents" && k !== "id")
                 .map(([key, value]: [string, any]) => (
@@ -1562,7 +1706,7 @@ function DetailModal({
                       <input
                         type="text"
                         defaultValue={value}
-                        className="w-full bg-white dark:bg-black/20 border-border-subtle dark:border-white/5 rounded-lg px-3 py-2 text-[11px] font-black uppercase outline-none focus:ring-2 focus:ring-trust/20 text-text-primary dark:text-white"
+                        className="w-full bg-white dark:bg-black/20 border-border-subtle dark:border-white/5 rounded-2xl px-3 py-2 text-[11px] font-black uppercase outline-none focus:ring-2 focus:ring-trust/20 text-text-primary dark:text-white"
                       />
                     ) : (
                       <p className="text-[12px] font-black text-text-primary dark:text-white uppercase tracking-tight">
@@ -1581,14 +1725,14 @@ function DetailModal({
             onClick={
               showVerification ? () => setShowVerification(false) : onClose
             }
-            className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle"
+            className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle"
           >
             Cancel
           </Button>
           {(isEditing || showVerification || !hasEdit) && (
             <Button
               onClick={handleSave}
-              className="h-12 px-10 bg-trust hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-trust/20"
+              className="h-12 px-10 bg-trust hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-trust/20"
             >
               {showVerification ? "Finalize Verification" : "Save Changes"}
             </Button>
@@ -1623,7 +1767,7 @@ export function PolicyModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-white/5"
+        className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/5"
       >
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/20">
           <div>
@@ -1638,7 +1782,7 @@ export function PolicyModal({
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
+              className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1646,7 +1790,7 @@ export function PolicyModal({
         </div>
 
         <div className="p-10 space-y-8 max-h-[60vh] overflow-y-auto no-scrollbar">
-          <div className="grid grid-cols-2 gap-8">
+          <div className="grid grid-cols-2 gap-6">
             <div className="space-y-1.5 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-transparent">
               <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
                 Plan Type
@@ -1675,7 +1819,7 @@ export function PolicyModal({
                   <div
                     key={dep.id}
                     onClick={() => onDependentClick(dep)}
-                    className="flex items-center justify-between p-4 bg-white dark:bg-[#1F2937] border border-border-subtle rounded-xl cursor-pointer hover:border-trust transition-colors"
+                    className="flex items-center justify-between p-4 bg-white dark:bg-[#1F2937] border border-border-subtle rounded-2xl cursor-pointer hover:border-trust transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <User className="w-4 h-4 text-trust" />
@@ -1730,7 +1874,7 @@ export function EditModal({
         onClick={onClose}
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
       />
-      <div className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col border border-white/5">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-[#111827] rounded-2xl shadow-2xl overflow-hidden flex flex-col border border-white/5">
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/5 flex items-center justify-between">
           <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-widest uppercase">
             Edit Member
@@ -1744,30 +1888,30 @@ export function EditModal({
             <input
               type="text"
               placeholder="Full Name"
-              className="w-full border border-border-subtle p-3 rounded-xl bg-slate-50 text-[11px] font-black uppercase text-slate-700"
+              className="w-full border border-border-subtle p-3 rounded-2xl bg-slate-50 text-[11px] font-black uppercase text-slate-700"
             />
             <input
               type="email"
               placeholder="Email Address"
-              className="w-full border border-border-subtle p-3 rounded-xl bg-slate-50 text-[11px] font-black uppercase text-slate-700"
+              className="w-full border border-border-subtle p-3 rounded-2xl bg-slate-50 text-[11px] font-black uppercase text-slate-700"
             />
             <input
               type="tel"
               placeholder="Phone Number"
-              className="w-full border border-border-subtle p-3 rounded-xl bg-slate-50 text-[11px] font-black uppercase text-slate-700"
+              className="w-full border border-border-subtle p-3 rounded-2xl bg-slate-50 text-[11px] font-black uppercase text-slate-700"
             />
           </div>
         </div>
         <div className="px-10 py-8 border-t border-border-subtle flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-6 py-3 border border-border-subtle rounded-xl text-[11px] font-black uppercase"
+            className="px-6 py-3 border border-border-subtle rounded-2xl text-[11px] font-black uppercase"
           >
             Cancel
           </button>
           <button
             onClick={() => onSave(formData)}
-            className="px-6 py-3 bg-trust text-white rounded-xl text-[11px] font-black uppercase shadow-lg shadow-trust/20"
+            className="px-6 py-3 bg-trust text-white rounded-2xl text-[11px] font-black uppercase shadow-lg shadow-trust/20"
           >
             Save Member
           </button>
@@ -1788,7 +1932,7 @@ const EnrollSection = ({
     <h3 className="text-[11px] font-black text-accent uppercase tracking-[0.4em] border-b border-border-subtle dark:border-white/5 pb-3">
       {title}
     </h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {children}
     </div>
   </div>
@@ -1815,7 +1959,7 @@ const EnrollField = ({
         value={value}
         onChange={(e) => updateForm(fieldKey, e.target.value)}
         disabled={disabled}
-        className={`h-11 w-full px-4 bg-white dark:bg-slate-950 border ${errors[fieldKey] ? "border-red-500 focus:ring-red-500/20" : "border-border-subtle dark:border-white/10 focus:ring-accent/20"} rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`h-11 w-full px-4 bg-white dark:bg-slate-950 border ${errors[fieldKey] ? "border-red-500 focus:ring-red-500/20" : "border-border-subtle dark:border-white/10 focus:ring-accent/20"} rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:ring-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
       >
         <option value="" disabled>
           {placeholder || `Select ${label}`}
@@ -1833,7 +1977,7 @@ const EnrollField = ({
         onChange={(e) => updateForm(fieldKey, e.target.value)}
         placeholder={placeholder || `Enter ${label}`}
         disabled={disabled}
-        className={`h-11 w-full px-4 bg-white dark:bg-slate-950 border ${errors[fieldKey] ? "border-red-500 focus:ring-red-500/20" : "border-border-subtle dark:border-white/10 focus:ring-accent/20"} rounded-xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+        className={`h-11 w-full px-4 bg-white dark:bg-slate-950 border ${errors[fieldKey] ? "border-red-500 focus:ring-red-500/20" : "border-border-subtle dark:border-white/10 focus:ring-accent/20"} rounded-2xl text-[12px] font-bold text-slate-900 dark:text-white outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed`}
       />
     )}
     {errors[fieldKey] && (
@@ -2005,7 +2149,7 @@ export function ClientEnrollModal({
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-[1000px] max-h-[90vh] bg-card-bg rounded-xl shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-[1000px] max-h-[90vh] bg-card-bg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       >
         <div className="px-8 py-4 border-b border-border-subtle dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/20">
           <div>
@@ -2019,14 +2163,14 @@ export function ClientEnrollModal({
 
           <button
             onClick={onClose}
-            className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="flex bg-slate-50 border-b border-border-subtle dark:bg-slate-900/50 dark:border-white/5 py-4 shrink-0 justify-center">
-          <div className="flex items-center justify-center gap-8 text-slate-500 w-full overflow-x-auto no-scrollbar">
+          <div className="flex items-center justify-center gap-6 text-slate-500 w-full overflow-x-auto no-scrollbar">
             {[
               { num: 1, title: "Identity Information" },
               { num: 2, title: "Policy Information" },
@@ -2437,7 +2581,7 @@ export function ClientEnrollModal({
             <Button
               variant="outline"
               onClick={prevStep}
-              className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+              className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
             >
               Previous
             </Button>
@@ -2445,7 +2589,7 @@ export function ClientEnrollModal({
             <Button
               variant="outline"
               onClick={onClose}
-              className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+              className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
             >
               Cancel
             </Button>
@@ -2454,14 +2598,14 @@ export function ClientEnrollModal({
           {step < 4 ? (
             <Button
               onClick={nextStep}
-              className="h-12 px-10 bg-accent hover:bg-accent/90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 transition-all"
+              className="h-12 px-10 bg-accent hover:bg-accent/90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20 transition-all"
             >
               Next Step
             </Button>
           ) : (
             <Button
               onClick={handleSaveInit}
-              className="h-12 px-10 bg-success hover:bg-success/90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-success/20 transition-all"
+              className="h-12 px-10 bg-success hover:bg-success/90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-success/20 transition-all"
             >
               Review & Save
             </Button>
@@ -2484,7 +2628,7 @@ export function ClientEnrollModal({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-2xl border border-border-subtle"
+              className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl p-8 shadow-2xl border border-border-subtle"
             >
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center text-accent">
@@ -2500,13 +2644,13 @@ export function ClientEnrollModal({
                 <div className="flex gap-4 w-full pt-4 border-t border-border-subtle dark:border-white/10">
                   <Button
                     variant="outline"
-                    className="flex-1 rounded-xl h-12"
+                    className="flex-1 rounded-2xl h-12"
                     onClick={() => setShowConfirm(false)}
                   >
                     Cancel
                   </Button>
                   <Button
-                    className="flex-1 bg-accent hover:bg-accent/90 text-white rounded-xl h-12 border-none"
+                    className="flex-1 bg-accent hover:bg-accent/90 text-white rounded-2xl h-12 border-none"
                     onClick={handleConfirmSave}
                   >
                     Save Member

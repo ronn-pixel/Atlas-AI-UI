@@ -24,19 +24,16 @@ export const useAuth = create<AuthState>((set) => ({
   error: null,
   login: async (email, password) => {
     // Simulate API call
-    if (email === 'agent101' && password === 'agent101') {
-      const mockUser = {
-        id: '1',
-        name: 'Agent 101',
-        email: 'agent101@atlasai.com',
-        role: 'Agent',
-        avatar: '', // removed unsplash
-        gender: 'UNKNOWN', // set to generic
-      };
-      set({ user: mockUser, isAuthenticated: true, error: null });
-    } else {
-      set({ error: 'Invalid username or password' });
-    }
+    const defaultName = email && email.trim() !== '' ? email : 'Agent 101';
+    const mockUser = {
+      id: '1',
+      name: defaultName,
+      email: email && email.trim() !== '' ? `${email}@atlasai.com` : 'agent101@atlasai.com',
+      role: 'Agent',
+      avatar: '', // removed unsplash
+      gender: 'UNKNOWN', // set to generic
+    };
+    set({ user: mockUser, isAuthenticated: true, error: null });
   },
   logout: () => set({ user: null, isAuthenticated: false }),
   clearError: () => set({ error: null }),

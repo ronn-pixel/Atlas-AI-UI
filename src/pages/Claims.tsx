@@ -29,7 +29,7 @@ import { motion, AnimatePresence } from 'motion/react';
 const ALL_CLAIMS = generateClaims(145);
 
 export default function Claims() {
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(20);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isInitializeModalOpen, setIsInitializeModalOpen] = React.useState(false);
   const [batchState, setBatchState] = React.useState<'idle' | 'loading' | 'success'>('idle');
@@ -55,92 +55,70 @@ export default function Claims() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 h-full flex flex-col">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Adjudication Feed</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2">Claim Lifecycle & Financial Settlement</p>
+    <div className="flex flex-col gap-[10px] animate-in fade-in duration-700 pb-0 m-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center flex-1 min-w-0 mr-8">
+          <div className="shrink-0 flex flex-col justify-center min-w-0 w-[270px] transition-all duration-300">
+            <div className="min-w-0 shrink">
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase truncate">Adjudication Feed</h1>
+              <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2 truncate">Claim Lifecycle & Financial Settlement</p>
+            </div>
+          </div>
+          <div className="w-[20px] shrink-0" />
+          <div className="h-12 w-px bg-border-subtle dark:bg-white/10 shrink-0" />
+          <div className="w-[20px] shrink-0" />
+          <div className="flex flex-nowrap items-center gap-4 flex-1 min-w-0">
+            {[
+              { label: 'Pending Adjudication', val: 142, icon: FileCheck },
+              { label: 'Auto-Approval Rate', val: '84.5%', icon: Activity },
+              { label: 'Potential Overpayment', val: '$12,402', icon: AlertCircle },
+              { label: 'Settled Today', val: '$84,290', icon: DollarSign },
+            ].map(s => (
+              <Card key={s.label} className="px-5 py-4 flex flex-row items-center justify-start gap-4 h-[84px] bg-card-bg shadow-soft border-none relative transition-all hover:bg-accent/5 group rounded-2xl flex-1 min-w-0 shrink-0">
+                <div className="flex flex-col justify-center">
+                  <s.icon className="w-[30px] h-[30px] text-accent shrink-0 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col justify-center min-w-0">
+                  <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none truncate">{s.label}</div>
+                  <div className="text-[22px] font-black text-slate-900 dark:text-white tabular-nums tracking-tight leading-none truncate">{s.val}</div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
-        <div className="flex gap-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleBatchProcess}
-            disabled={batchState === 'loading'}
-            className={cn(
-              "h-14 border-none shadow-soft font-black px-8 uppercase tracking-widest text-[10px] rounded-2xl transition-all flex items-center gap-3",
-              batchState === 'success' ? "bg-success text-white" : "bg-card-bg text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
-            )}
-          >
-            {batchState === 'loading' ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Processing Batch...
-              </>
-            ) : batchState === 'success' ? (
-              <>
-                <Check className="w-4 h-4" />
-                Batch Synchronized
-              </>
-            ) : (
-              <>
-                <Activity className="w-4 h-4" />
-                Batch Processing
-              </>
-            )}
-          </Button>
-          <Button 
-            onClick={() => setIsInitializeModalOpen(true)}
-            size="sm" 
-            className="h-14 bg-accent hover:opacity-90 text-white font-black uppercase text-[11px] tracking-[0.4em] px-12 shadow-xl shadow-accent/20 border-none rounded-2xl transition-all transform active:scale-95 flex items-center gap-3"
-          >
-            <Plus className="w-5 h-5" /> Initialize Claim
-          </Button>
-        </div>
+        <Button 
+          variant="primaryAction"
+          size="primaryAction"
+          style={{ width: '276px' }}
+          onClick={() => setIsInitializeModalOpen(true)}
+        >
+          <Plus className="w-5 h-5 flex-shrink-0" /> INITIALIZE CLAIM
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
-        {[
-          { label: 'Pending Adjudication', val: 142, icon: FileCheck, color: 'bg-indigo-600' },
-          { label: 'Auto-Approval Rate', val: '84.5%', icon: Activity, color: 'bg-success' },
-          { label: 'Potential Overpayment', val: '$12,402', icon: AlertCircle, color: 'bg-danger' },
-          { label: 'Settled Today', val: '$84,290', icon: DollarSign, color: 'bg-blue-600' },
-        ].map(s => (
-          <Card key={s.label} className="p-6 h-28 bg-card-bg border-none shadow-soft rounded-2xl flex items-center gap-6">
-            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0", s.color)}>
-              <s.icon className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{s.label}</p>
-              <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">{s.val}</h4>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="overflow-hidden bg-card-bg border-none rounded-xl shadow-soft flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-auto no-scrollbar">
+      <Card className="overflow-hidden bg-card-bg border-none rounded-2xl shadow-soft flex flex-col h-[900px] shrink-0 m-0">
+        <div className="w-full flex-1 overflow-auto min-h-0 relative">
           <table className="w-full border-collapse table-fixed min-w-[1200px]">
-            <thead className="sticky top-0 z-10 bg-bg-app">
+            <thead className="bg-bg-app sticky top-0 z-10 shadow-[0_1px_0_0_theme(colors.border.subtle)]">
               <tr className="bg-bg-app">
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Claim ID</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[12%] text-left align-middle">Subscriber</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Type</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Status</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[15%] text-left align-middle">Provider Node</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Claimed</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Approved</th>
-                <th className="px-4 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[12%] text-left align-middle">DOS Registry</th>
-                <th className="px-10 py-3 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[11%] text-center align-middle">Action</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Claim ID</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[12%] text-left align-middle">Subscriber</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Type</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Status</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[15%] text-left align-middle">Provider Node</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Claimed</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[10%] text-left align-middle">Approved</th>
+                <th className="h-[46px] py-0 px-4 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[12%] text-left align-middle">DOS Registry</th>
+                <th className="h-[46px] py-0 px-10 font-black uppercase tracking-[0.3em] text-text-muted text-[9px] w-[11%] text-center align-middle">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle text-[13px]">
               {currentClaims.map((c) => (
                 <tr key={c.id} className="hover:bg-bg-app transition-all duration-300 group">
-                  <td className="px-4 py-4 font-black text-accent uppercase tracking-[0.15em] text-[10px] tabular-nums text-left">{c.id}</td>
-                  <td className="px-4 py-4 font-black text-text-primary uppercase tracking-tight text-[12px] truncate text-left">{c.member}</td>
-                  <td className="px-4 py-4 text-text-muted font-bold uppercase tracking-widest text-[9px] truncate text-left">{c.type}</td>
-                  <td className="px-4 py-4 text-left">
+                  <td className="h-[54px] py-0 px-4 font-black text-accent uppercase tracking-[0.15em] text-[10px] tabular-nums text-left">{c.id}</td>
+                  <td className="h-[54px] py-0 px-4 font-black text-text-primary uppercase tracking-tight text-[12px] truncate text-left">{c.member}</td>
+                  <td className="h-[54px] py-0 px-4 text-text-muted font-bold uppercase tracking-widest text-[9px] truncate text-left">{c.type}</td>
+                  <td className="h-[54px] py-0 px-4 text-left">
                     <Badge className={cn(
                       "text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 border-none shadow-none",
                       c.status === 'Approved' ? 'bg-success/10 text-success' : c.status === 'Pending' ? 'bg-warning/10 text-warning' : c.status === 'Denied' ? 'bg-danger/10 text-danger' : 'bg-indigo-500/10 text-indigo-500'
@@ -148,11 +126,11 @@ export default function Claims() {
                       {c.status}
                     </Badge>
                   </td>
-                  <td className="px-4 py-4 font-black text-text-primary uppercase tracking-widest text-[10px] truncate text-left">{c.provider}</td>
-                  <td className="px-4 py-4 text-left font-black text-text-primary uppercase tracking-widest text-[10px] tabular-nums">{c.claimed}</td>
-                  <td className="px-4 py-4 text-left font-black text-text-primary uppercase tracking-widest text-[10px] tabular-nums">{c.approved}</td>
-                  <td className="px-4 py-4 text-text-muted font-black tracking-widest text-[10px] tabular-nums text-left">{c.date}</td>
-                  <td className="px-10 py-4 text-center align-middle">
+                  <td className="h-[54px] py-0 px-4 font-black text-text-primary uppercase tracking-widest text-[10px] truncate text-left">{c.provider}</td>
+                  <td className="h-[54px] py-0 px-4 text-left font-black text-text-primary uppercase tracking-widest text-[10px] tabular-nums">{c.claimed}</td>
+                  <td className="h-[54px] py-0 px-4 text-left font-black text-text-primary uppercase tracking-widest text-[10px] tabular-nums">{c.approved}</td>
+                  <td className="h-[54px] py-0 px-4 text-text-muted font-black tracking-widest text-[10px] tabular-nums text-left">{c.date}</td>
+                  <td className="h-[54px] py-0 px-10 text-center align-middle">
                     <div className="flex items-center justify-center gap-2">
                        <button className="p-2 text-text-muted hover:text-accent transition-all transform active:scale-90"><Eye className="w-3.5 h-3.5" /></button>
                        <button className="p-2 text-text-muted hover:text-accent transition-all transform active:scale-90"><Edit className="w-3.5 h-3.5" /></button>
@@ -172,7 +150,6 @@ export default function Claims() {
           totalRecords={ALL_CLAIMS.length}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
-          className="!mb-[5px]"
         />
       </Card>
 
@@ -209,7 +186,7 @@ function ClaimModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () 
       <h3 className="text-[11px] font-black text-accent uppercase tracking-[0.4em] border-b border-border-subtle dark:border-white/5 pb-3">
         {title}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {children}
       </div>
     </div>
@@ -221,7 +198,7 @@ function ClaimModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () 
       {options ? (
         <select 
           defaultValue={value}
-          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
         >
           <option value="" disabled>{placeholder || `Select ${label}`}</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -231,7 +208,7 @@ function ClaimModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () 
           type={type} 
           defaultValue={value}
           placeholder={placeholder || `Enter ${label}`}
-          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20" 
+          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20" 
         />
       )}
     </div>
@@ -251,7 +228,7 @@ function ClaimModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Modal Header */}
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/20">
@@ -266,7 +243,7 @@ function ClaimModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () 
           
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -294,13 +271,13 @@ function ClaimModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: () 
           <Button 
             variant="outline" 
             onClick={onClose}
-            className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+            className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
           >
             Cancel
           </Button>
           <Button 
             onClick={() => onSave(formData)}
-            className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
+            className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
           >
             Submit Claim
           </Button>

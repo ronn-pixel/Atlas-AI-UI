@@ -34,7 +34,7 @@ export default function Settings() {
         <p className="text-text-muted text-[11px] font-black uppercase tracking-[0.4em] mt-2">Personal Configuration & Security Tiers</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <aside className="space-y-2">
           {[
             { label: 'Profile Interface', icon: User, active: true },
@@ -61,36 +61,36 @@ export default function Settings() {
         </aside>
 
         <main className="md:col-span-2 space-y-8">
-          <Card className="p-10 border-none bg-card-bg rounded-[3.5rem] shadow-soft">
+          <Card className="p-10 border-none bg-card-bg rounded-2xl shadow-soft">
             <h3 className="text-[11px] font-black text-text-muted uppercase tracking-[0.4em] mb-10">Identity Metadata</h3>
             
-            <div className="flex items-center gap-10 mb-12">
+            <div className="flex items-center gap-6 mb-12">
                <div className="relative group">
                  <AvatarIcon 
                     gender={user?.gender} 
                     seedString={user?.name || user?.email}
-                    className="w-24 h-24 rounded-[2rem] overflow-hidden shadow-2xl transition-transform group-hover:scale-105" 
+                    className="w-24 h-24 rounded-2xl overflow-hidden shadow-2xl transition-transform group-hover:scale-105" 
                  />
-                  <button className="absolute -bottom-2 -right-2 p-3 bg-accent text-white rounded-xl shadow-xl hover:scale-110 active:scale-95 transition-all">
+                  <button className="absolute -bottom-2 -right-2 p-3 bg-accent text-white rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all">
                      <Zap className="w-4 h-4" />
                   </button>
                </div>
                <div className="space-y-2">
-                  <h4 className="text-2xl font-black text-text-primary tracking-widest uppercase">{user?.name}</h4>
+                  <h4 className="text-2xl font-black text-text-primary tracking-widest uppercase">{user?.name || user?.email?.split('@')[0] || 'Agent 101'}</h4>
                   <div className="flex items-center gap-3">
-                     <Badge className="bg-success/10 text-success border-none text-[8px] font-black uppercase tracking-widest px-3">{user?.role}</Badge>
+                     <Badge className="bg-success/10 text-success border-none text-[8px] font-black uppercase tracking-widest px-3">{user?.role || 'Agent'}</Badge>
                      <span className="text-[11px] font-black text-text-muted opacity-40 uppercase tracking-widest">{user?.email}</span>
                   </div>
                </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-8 border-t border-border-subtle">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-8 border-t border-border-subtle">
                <div className="space-y-2">
                   <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Display Identity</label>
                   <input 
                     type="text" 
-                    defaultValue={user?.name}
-                    className="w-full h-12 bg-bg-app border-none rounded-xl px-4 text-sm font-bold text-text-primary focus:ring-2 focus:ring-accent/20 outline-none transition-all" 
+                    defaultValue={user?.name || user?.email?.split('@')[0] || ''}
+                    className="w-full h-12 bg-bg-app border-none rounded-2xl px-4 text-sm font-bold text-text-primary focus:ring-2 focus:ring-accent/20 outline-none transition-all" 
                   />
                </div>
                <div className="space-y-2">
@@ -98,19 +98,19 @@ export default function Settings() {
                   <input 
                     type="email" 
                     defaultValue={user?.email}
-                    className="w-full h-12 bg-bg-app border-none rounded-xl px-4 text-sm font-bold text-text-primary focus:ring-2 focus:ring-accent/20 outline-none transition-all" 
+                    className="w-full h-12 bg-bg-app border-none rounded-2xl px-4 text-sm font-bold text-text-primary focus:ring-2 focus:ring-accent/20 outline-none transition-all" 
                   />
                </div>
             </div>
             
             <div className="mt-12 flex justify-end">
-               <Button className="bg-accent hover:opacity-90 h-14 px-12 text-white font-black uppercase text-[11px] tracking-[0.4em] rounded-[2rem] shadow-xl shadow-accent/20 border-none transition-all active:scale-95">
+               <Button className="bg-accent hover:opacity-90 h-14 px-12 text-white font-black uppercase text-[11px] tracking-[0.4em] rounded-2xl shadow-xl shadow-accent/20 border-none transition-all active:scale-95">
                  Commit Metadata
                </Button>
             </div>
           </Card>
 
-          <Card className="p-10 border-none bg-card-bg rounded-[3.5rem] shadow-soft">
+          <Card className="p-10 border-none bg-card-bg rounded-2xl shadow-soft">
              <div className="flex justify-between items-center mb-10">
                 <h3 className="text-[11px] font-black text-text-muted uppercase tracking-[0.4em]">Visual Geometry</h3>
                 <div className="flex items-center gap-3 py-1.5 px-4 bg-bg-app rounded-full">
@@ -122,7 +122,7 @@ export default function Settings() {
              <div className="space-y-6">
                 <div 
                   onClick={toggleTheme}
-                  className="p-6 bg-bg-app rounded-3xl flex items-center justify-between cursor-pointer hover:bg-accent/5 group transition-all"
+                  className="p-6 bg-bg-app rounded-2xl flex items-center justify-between cursor-pointer hover:bg-accent/5 group transition-all"
                 >
                    <div className="flex items-center gap-5">
                       <div className="w-12 h-12 rounded-2xl bg-card-bg flex items-center justify-center shadow-soft border border-border-subtle">
@@ -144,7 +144,7 @@ export default function Settings() {
                    </div>
                 </div>
 
-                <div className="p-6 bg-bg-app rounded-3xl flex items-center justify-between opacity-50 group pointer-events-none">
+                <div className="p-6 bg-bg-app rounded-2xl flex items-center justify-between opacity-50 group pointer-events-none">
                    <div className="flex items-center gap-5">
                       <div className="w-12 h-12 rounded-2xl bg-card-bg flex items-center justify-center shadow-soft border border-border-subtle">
                         <Monitor className="w-5 h-5 text-text-muted" />
@@ -161,7 +161,7 @@ export default function Settings() {
              </div>
           </Card>
 
-          <Card className="p-10 border-none bg-danger/5 dark:bg-danger/10 rounded-[3.5rem] shadow-none flex items-center justify-between">
+          <Card className="p-10 border-none bg-danger/5 dark:bg-danger/10 rounded-2xl shadow-none flex items-center justify-between">
              <div className="flex items-center gap-6">
                 <div className="w-14 h-14 bg-danger/10 text-danger rounded-2xl flex items-center justify-center shadow-none border-none">
                   <Shield className="w-7 h-7" />

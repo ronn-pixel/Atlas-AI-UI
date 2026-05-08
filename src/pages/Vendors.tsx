@@ -27,7 +27,7 @@ const ALL_VENDORS = generateVendors(112);
 
 export default function Vendors() {
   const [selectedVendor, setSelectedVendor] = React.useState<any>(null);
-  const [pageSize, setPageSize] = React.useState(10);
+  const [pageSize, setPageSize] = React.useState(20);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [isAddVendorModalOpen, setIsAddVendorModalOpen] = React.useState(false);
 
@@ -51,9 +51,9 @@ export default function Vendors() {
            </div>
         </div>
 
-        <Card className="p-10 border-none bg-white dark:bg-[#1F2937] rounded-[3rem] shadow-soft flex flex-col lg:flex-row gap-12 items-start">
+        <Card className="p-10 border-none bg-white dark:bg-[#1F2937] rounded-2xl shadow-soft flex flex-col lg:flex-row gap-6 items-start">
            <div className="flex flex-col items-center gap-6 shrink-0">
-              <div className="w-40 h-40 rounded-[3rem] bg-slate-50 dark:bg-black/20 flex items-center justify-center relative shadow-xl overflow-hidden group border-4 border-white dark:border-slate-800">
+              <div className="w-40 h-40 rounded-2xl bg-slate-50 dark:bg-black/20 flex items-center justify-center relative shadow-xl overflow-hidden group border-4 border-white dark:border-slate-800">
                   <Building2 className="w-20 h-20 text-accent" />
               </div>
               <div className="text-center">
@@ -63,7 +63,7 @@ export default function Vendors() {
            </div>
 
            <div className="flex-1 space-y-10 w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-10 gap-x-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[
                   { l: 'Business Entity', v: selectedVendor.name, icon: Building2 },
                   { l: 'Point of Contact', v: selectedVendor.contact, icon: User },
@@ -82,14 +82,14 @@ export default function Vendors() {
                 ))}
               </div>
 
-              <div className="p-8 bg-accent/5 rounded-[2.5rem] border border-accent/10 flex items-center justify-between">
+              <div className="p-8 bg-accent/5 rounded-2xl border border-accent/10 flex items-center justify-between">
                  <div>
                     <h4 className="text-[11px] font-black text-accent uppercase tracking-widest">Active HIPAA Verification</h4>
                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-tight mt-1">This node is verified for PHI orchestration</p>
                  </div>
                  <Button 
                    variant="outline" 
-                   className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest border-accent/20 text-accent hover:bg-accent hover:text-white transition-all shadow-lg shadow-accent/5"
+                   className="h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest border-accent/20 text-accent hover:bg-accent hover:text-white transition-all shadow-lg shadow-accent/5"
                  >
                    Verify Compliance Now
                  </Button>
@@ -97,8 +97,8 @@ export default function Vendors() {
            </div>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-           <Card className="p-8 bg-white dark:bg-[#1F2937] border-none rounded-[3rem] shadow-soft">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+           <Card className="p-8 bg-white dark:bg-[#1F2937] border-none rounded-2xl shadow-soft">
               <h3 className="font-black text-[12px] text-text-muted uppercase tracking-[0.4em] mb-8">Service Level Agreements (SLA)</h3>
               <div className="space-y-6">
                 {[
@@ -119,7 +119,7 @@ export default function Vendors() {
               </div>
            </Card>
 
-           <Card className="p-8 bg-white dark:bg-[#1F2937] border-none rounded-[3rem] shadow-soft">
+           <Card className="p-8 bg-white dark:bg-[#1F2937] border-none rounded-2xl shadow-soft">
               <h3 className="font-black text-[12px] text-text-muted uppercase tracking-[0.4em] mb-8">Node Telemetry</h3>
               <div className="space-y-6">
                 {[
@@ -154,59 +154,66 @@ export default function Vendors() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 h-full flex flex-col">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase">Vendor Network</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2">Operational Service Providers</p>
+    <div className="flex flex-col gap-[10px] animate-in fade-in duration-700 pb-0 m-0">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center flex-1 min-w-0 mr-8">
+          <div className="shrink-0 flex flex-col justify-center min-w-0 w-[270px] transition-all duration-300">
+            <div className="min-w-0 shrink">
+              <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-widest uppercase truncate">Vendor Network</h1>
+              <p className="text-slate-600 dark:text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] mt-2 truncate">Operational Service Providers</p>
+            </div>
+          </div>
+          <div className="w-[20px] shrink-0" />
+          <div className="h-12 w-px bg-border-subtle dark:bg-white/10 shrink-0" />
+          <div className="w-[20px] shrink-0" />
+          <div className="flex flex-nowrap items-center gap-4 flex-1 min-w-0">
+             {[
+               { label: 'Total Vendors', val: 84, icon: Building2 },
+               { label: 'Avg Performance', val: '92%', icon: Star },
+               { label: 'Contract Renewals', val: 12, icon: Calendar },
+               { label: 'Critical Node Alerts', val: 2, icon: Activity },
+            ].map(s => (
+              <Card key={s.label} className="px-5 py-4 flex flex-row items-center justify-start gap-4 h-[84px] bg-card-bg shadow-soft border-none relative transition-all hover:bg-accent/5 group rounded-2xl flex-1 min-w-0 shrink-0">
+                <div className="flex flex-col justify-center">
+                  <s.icon className="w-[30px] h-[30px] text-accent shrink-0 group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+                </div>
+                <div className="flex flex-col justify-center min-w-0">
+                  <div className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none truncate">{s.label}</div>
+                  <div className="text-[22px] font-black text-slate-900 dark:text-white tabular-nums tracking-tight leading-none truncate">{s.val}</div>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
         <Button 
+          variant="primaryAction"
+          size="primaryAction"
+          style={{ width: '276px' }}
           onClick={() => setIsAddVendorModalOpen(true)}
-          size="sm" 
-          className="h-14 bg-accent hover:opacity-90 text-white font-black uppercase text-[11px] tracking-[0.4em] px-12 shadow-xl shadow-accent/20 border-none rounded-2xl transition-all transform active:scale-95 flex items-center gap-3"
         >
-          <Plus className="w-5 h-5" /> Add Vendor
+          <Plus className="w-5 h-5 flex-shrink-0" /> ADD VENDOR
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
-        {[
-          { label: 'Total Vendors', val: 84, icon: Building2, color: 'bg-accent' },
-          { label: 'Avg Performance', val: '92%', icon: Star, color: 'bg-success' },
-          { label: 'Contract Renewals', val: 12, icon: Calendar, color: 'bg-indigo-600' },
-          { label: 'Critical Node Alerts', val: 2, icon: Activity, color: 'bg-danger' },
-        ].map(s => (
-          <Card key={s.label} className="p-6 h-28 bg-card-bg border-none shadow-soft rounded-2xl flex items-center gap-6">
-            <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0", s.color)}>
-              <s.icon className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{s.label}</p>
-              <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5">{s.val}</h4>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="overflow-hidden bg-card-bg border-none rounded-xl shadow-soft flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-auto no-scrollbar">
+      <Card className="overflow-hidden bg-card-bg border-none rounded-2xl shadow-soft flex flex-col h-[900px] shrink-0 m-0">
+        <div className="w-full flex-1 overflow-auto min-h-0 relative">
           <table className="w-full border-collapse table-fixed min-w-[1200px]">
-            <thead className="sticky top-0 z-10 bg-bg-app">
+            <thead className="bg-bg-app sticky top-0 z-10 shadow-[0_1px_0_0_theme(colors.border.subtle)]">
               <tr className="bg-bg-app">
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Company Name</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Contact Person</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Service Type</th>
-                <th className="px-6 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Status</th>
-                <th className="px-10 py-3 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-center align-middle">Action</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Company Name</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Contact Person</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Service Type</th>
+                <th className="h-[46px] py-0 px-6 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-left align-middle">Status</th>
+                <th className="h-[46px] py-0 px-10 font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400 text-[10px] w-1/5 text-center align-middle">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-subtle text-[13px]">
               {currentVendors.map((v) => (
                 <tr key={v.id} className="hover:bg-bg-app transition-all duration-300 group">
-                  <td className="px-6 py-4 font-black text-text-primary uppercase tracking-tight text-sm truncate text-left">{v.name}</td>
-                  <td className="px-6 py-4 font-black text-text-primary uppercase tracking-widest text-[11px] tabular-nums text-left">{v.contact}</td>
-                  <td className="px-6 py-4 text-text-muted font-bold uppercase tracking-widest text-[10px] truncate text-left">{v.category}</td>
-                  <td className="px-6 py-4 text-left">
+                  <td className="h-[54px] py-0 px-6 font-black text-text-primary uppercase tracking-tight text-sm truncate text-left">{v.name}</td>
+                  <td className="h-[54px] py-0 px-6 font-black text-text-primary uppercase tracking-widest text-[11px] tabular-nums text-left">{v.contact}</td>
+                  <td className="h-[54px] py-0 px-6 text-text-muted font-bold uppercase tracking-widest text-[10px] truncate text-left">{v.category}</td>
+                  <td className="h-[54px] py-0 px-6 text-left">
                     <Badge className={cn(
                       "text-[8.5px] font-black uppercase tracking-[0.2em] px-3 py-1 border-none shadow-none",
                       v.status === 'Active' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
@@ -214,7 +221,7 @@ export default function Vendors() {
                       {v.status}
                     </Badge>
                   </td>
-                  <td className="px-10 py-4 text-center align-middle">
+                  <td className="h-[54px] py-0 px-10 text-center align-middle">
                     <div className="flex items-center justify-center gap-2">
                        <button 
                          onClick={() => setSelectedVendor(v)}
@@ -239,7 +246,6 @@ export default function Vendors() {
           totalRecords={ALL_VENDORS.length}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
-          className="!mb-[5px]"
         />
       </Card>
 
@@ -277,7 +283,7 @@ function VendorModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: ()
       <h3 className="text-[11px] font-black text-accent uppercase tracking-[0.4em] border-b border-border-subtle dark:border-white/5 pb-3">
         {title}
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {children}
       </div>
     </div>
@@ -289,7 +295,7 @@ function VendorModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: ()
       {options ? (
         <select 
           defaultValue={value}
-          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
+          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20 cursor-pointer"
         >
           <option value="" disabled>{placeholder || `Select ${label}`}</option>
           {options.map(o => <option key={o} value={o}>{o}</option>)}
@@ -299,7 +305,7 @@ function VendorModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: ()
           type={type} 
           defaultValue={value}
           placeholder={placeholder || `Enter ${label}`}
-          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20" 
+          className="h-10 w-full px-4 bg-white dark:bg-slate-950 border border-border-subtle dark:border-white/10 rounded-2xl text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-tight outline-none focus:ring-2 focus:ring-accent/20" 
         />
       )}
     </div>
@@ -319,7 +325,7 @@ function VendorModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: ()
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-[2rem] shadow-2xl overflow-hidden flex flex-col"
+        className="relative w-full max-w-6xl max-h-[90vh] bg-card-bg rounded-2xl shadow-2xl overflow-hidden flex flex-col"
       >
         {/* Modal Header */}
         <div className="px-10 py-8 border-b border-border-subtle dark:border-white/10 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/20">
@@ -334,7 +340,7 @@ function VendorModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: ()
           
           <button 
             onClick={onClose}
-            className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -363,13 +369,13 @@ function VendorModal({ isOpen, onClose, onSave }: { isOpen: boolean, onClose: ()
           <Button 
             variant="outline" 
             onClick={onClose}
-            className="h-12 px-8 rounded-xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
+            className="h-12 px-8 rounded-2xl text-[11px] font-black uppercase tracking-widest border-border-subtle dark:border-white/10"
           >
             Cancel
           </Button>
           <Button 
             onClick={() => onSave(formData)}
-            className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
+            className="h-12 px-10 bg-accent hover:opacity-90 text-white border-none rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-xl shadow-accent/20"
           >
             Add Vendor
           </Button>
